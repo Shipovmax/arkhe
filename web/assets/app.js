@@ -57,10 +57,10 @@ function buildArcSVG(id) {
       </linearGradient>
     </defs>
     <path class="arc-track"
-      d="M10,100 A${ARC_R},${ARC_R} 0 0,1 190,100"
+      d="M20,100 A${ARC_R},${ARC_R} 0 0,1 180,100"
     />
     <path class="arc-fill" id="arc-fill-${id}"
-      d="M10,100 A${ARC_R},${ARC_R} 0 0,1 190,100"
+      d="M20,100 A${ARC_R},${ARC_R} 0 0,1 180,100"
       stroke="url(#arcGrad${id})"
       stroke-dasharray="${ARC_CIRC}"
       stroke-dashoffset="${ARC_CIRC}"
