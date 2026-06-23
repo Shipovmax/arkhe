@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Твой недельный отчёт</title></head>
+<body style="font-family: Inter, sans-serif; background: #0d0d12; color: #e2e8f0; padding: 40px; max-width: 600px; margin: 0 auto;">
+  <h1 style="color: #a855f7; letter-spacing: -0.02em;">Отчёт за неделю</h1>
+  <table style="width:100%; border-collapse:collapse; margin-top:24px;">
+    <tr><td style="padding:8px 0; color:#64748b;">XP за неделю</td><td style="text-align:right; font-weight:600; color:#a855f7;">+{{.WeeklyXP}}</td></tr>
+    <tr><td style="padding:8px 0; color:#64748b;">Текущий уровень</td><td style="text-align:right; font-weight:600;">{{.Level}}</td></tr>
+    <tr><td style="padding:8px 0; color:#64748b;">Лучший стрик</td><td style="text-align:right; font-weight:600;">{{.BestStreak}} дней</td></tr>
+  </table>
+  <a href="https://arkhe.app/app.html" style="display:inline-block; margin-top:32px; padding:12px 24px; background:#7c3aed; color:#fff; border-radius:8px; text-decoration:none; font-weight:600;">
+    Открыть Arkhe
+  </a>
+</body>
+</html>
