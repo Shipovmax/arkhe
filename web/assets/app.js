@@ -29,6 +29,7 @@ const I18N = {
     streak_days:    'дней стрика',
     last_activities:'Последние активности',
     no_activities:  'Активностей пока нет. Запиши первую!',
+    no_stats:       'Нет навыков. Добавь первый!',
     add_stat:       '+ Добавить навык',
     subscription:   'Подписка',
     soon:           'скоро',
@@ -63,6 +64,32 @@ const I18N = {
     freq_label:    (n) => `раз в ${n} дн.`,
     to_level:      (lv, xp) => `до Lv.${lv}: ${xp} XP`,
     xp_label:      (xp, lv, xpNext) => `${xp.toLocaleString()} XP · до Lv.${lv}: ${xpNext.toLocaleString()} XP`,
+    show_more:     'Показать ещё',
+    cancel:        'Отмена',
+    delete_btn:    'Удалить',
+    delete_skill:  'Удалить навык?',
+    show_pw:       'Показать/скрыть пароль',
+    email_error:   'Введите корректный email',
+    password_error:'Введите пароль',
+    password_min:  'Минимум 8 символов',
+    name_error:    'Введи имя',
+    wrong_creds:   'Неверный email или пароль',
+    err_login:     'Ошибка входа',
+    err_register:  'Ошибка регистрации',
+    err_create_char:'Ошибка создания персонажа',
+    err_add:       'Ошибка добавления',
+    err_delete:    'Не удалось удалить',
+    err_export:    'Ошибка экспорта',
+    csv_date:      'Дата',
+    csv_xp_day:    'XP за день',
+    csv_skill:     'Навык',
+    csv_desc:      'Описание',
+    theme_light:      'Светлая тема',
+    theme_dark:       'Тёмная тема',
+    push_enable:      '🔔 Включить уведомления',
+    push_disable:     '🔕 Выключить уведомления',
+    push_denied:      'Уведомления заблокированы в браузере',
+    push_unsupported: 'Браузер не поддерживает уведомления',
   },
   en: {
     tagline:        'Level up your real life like an RPG.<br>Workouts, reading, work — everything earns XP.<br>Rise in levels. <strong>Don\'t quit.</strong>',
@@ -88,6 +115,7 @@ const I18N = {
     streak_days:    'day streak',
     last_activities:'Recent activities',
     no_activities:  'No activities yet. Log your first!',
+    no_stats:       'No skills yet. Add your first!',
     add_stat:       '+ Add skill',
     subscription:   'Subscription',
     soon:           'soon',
@@ -122,6 +150,32 @@ const I18N = {
     freq_label:    (n) => `every ${n} day${n===1?'':'s'}`,
     to_level:      (lv, xp) => `to Lv.${lv}: ${xp} XP`,
     xp_label:      (xp, lv, xpNext) => `${xp.toLocaleString()} XP · to Lv.${lv}: ${xpNext.toLocaleString()} XP`,
+    show_more:     'Show more',
+    cancel:        'Cancel',
+    delete_btn:    'Delete',
+    delete_skill:  'Delete skill?',
+    show_pw:       'Show/hide password',
+    email_error:   'Enter a valid email',
+    password_error:'Enter your password',
+    password_min:  'At least 8 characters',
+    name_error:    'Enter a name',
+    wrong_creds:   'Invalid email or password',
+    err_login:     'Login failed',
+    err_register:  'Registration failed',
+    err_create_char:'Failed to create character',
+    err_add:       'Failed to add skill',
+    err_delete:    'Failed to delete',
+    err_export:    'Export failed',
+    csv_date:      'Date',
+    csv_xp_day:    'XP per day',
+    csv_skill:     'Skill',
+    csv_desc:      'Description',
+    theme_light:      'Light theme',
+    theme_dark:       'Dark theme',
+    push_enable:      '🔔 Enable notifications',
+    push_disable:     '🔕 Disable notifications',
+    push_denied:      'Notifications blocked in browser settings',
+    push_unsupported: 'Browser does not support notifications',
   },
 };
 
@@ -368,7 +422,7 @@ function attachPwToggle(inputId) {
   btn.type = 'button';
   btn.className = 'pw-toggle';
   btn.textContent = '👁';
-  btn.title = 'Показать/скрыть пароль';
+  btn.title = t('show_pw');
   btn.addEventListener('click', () => {
     const show = input.type === 'password';
     input.type = show ? 'text' : 'password';
@@ -439,7 +493,7 @@ function renderLoginForm() {
       <div class="field-error"></div>
     </div>
     <div class="form-group">
-      <label>${t('login')}</label>
+      <label>${t('password')}</label>
       <div class="input-wrap">
         <input class="input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
       </div>
@@ -477,12 +531,12 @@ async function doLogin() {
 
   let valid = true;
   if (!validateEmail(emailEl.value)) {
-    showFieldError(emailEl, 'Введите корректный email');
+    showFieldError(emailEl, t('email_error'));
     valid = false;
   } else clearFieldError(emailEl);
 
   if (!pwEl.value) {
-    showFieldError(pwEl, 'Введите пароль');
+    showFieldError(pwEl, t('password_error'));
     valid = false;
   } else clearFieldError(pwEl);
 
@@ -498,7 +552,7 @@ async function doLogin() {
     state.activities = Array.isArray(acts) ? acts : [];
     showDashboard();
   } catch (e) {
-    errEl.textContent = e.status === 401 ? 'Неверный email или пароль' : (e.data?.error || 'Ошибка входа');
+    errEl.textContent = e.status === 401 ? t('wrong_creds') : (e.data?.error || t('err_login'));
     errEl.style.display = 'block';
   }
 }
@@ -511,12 +565,12 @@ async function doRegister() {
 
   let valid = true;
   if (!validateEmail(emailEl.value)) {
-    showFieldError(emailEl, 'Введите корректный email');
+    showFieldError(emailEl, t('email_error'));
     valid = false;
   } else clearFieldError(emailEl);
 
   if (pwEl.value.length < 8) {
-    showFieldError(pwEl, 'Минимум 8 символов');
+    showFieldError(pwEl, t('password_min'));
     valid = false;
   } else clearFieldError(pwEl);
 
@@ -531,7 +585,7 @@ async function doRegister() {
 let ob = { step: 1, class: null, stats: [], displayName: '' };
 
 // Категории с подкатегориями
-const STAT_CATEGORIES = [
+const STAT_CATEGORIES_RU = [
   {
     name: 'Физическая форма', icon: '💪',
     subs: [
@@ -580,6 +634,59 @@ const STAT_CATEGORIES = [
   },
 ];
 
+const STAT_CATEGORIES_EN = [
+  {
+    name: 'Physical fitness', icon: '💪',
+    subs: [
+      { name: 'Gym', icon: '🏋️' },
+      { name: 'Running', icon: '🏃' },
+      { name: 'Yoga', icon: '🧘' },
+      { name: 'Cycling', icon: '🚴' },
+      { name: 'Swimming', icon: '🏊' },
+    ],
+  },
+  {
+    name: 'Mental development', icon: '🧠',
+    subs: [
+      { name: 'Course / learning', icon: '🎓' },
+      { name: 'Language study', icon: '🗣️' },
+      { name: 'Problem solving', icon: '🧩' },
+      { name: 'Meditation', icon: '🪷' },
+    ],
+  },
+  {
+    name: 'Discipline', icon: '🎯',
+    subs: [
+      { name: 'Early rise', icon: '🌅' },
+      { name: 'No social media', icon: '📵' },
+      { name: 'Day planning', icon: '📋' },
+      { name: 'Cold shower', icon: '🚿' },
+    ],
+  },
+  {
+    name: 'Reading & learning', icon: '📚',
+    subs: [
+      { name: 'Book', icon: '📖' },
+      { name: 'Article / blog', icon: '📰' },
+      { name: 'Podcast', icon: '🎙️' },
+      { name: 'Research paper', icon: '🔬' },
+    ],
+  },
+  {
+    name: 'Social skills', icon: '🤝',
+    subs: [
+      { name: 'Networking', icon: '🌐' },
+      { name: 'Public speaking', icon: '🎤' },
+      { name: 'Helping others', icon: '🫂' },
+      { name: 'New acquaintance', icon: '👋' },
+    ],
+  },
+];
+
+function getStatCategories() {
+  return getLang() === 'en' ? STAT_CATEGORIES_EN : STAT_CATEGORIES_RU;
+}
+
 // Состояние пузырьков (какая категория раскрыта)
 let ob_openCategory = null;
 
@@ -627,7 +734,7 @@ function renderObStep() {
 
   } else if (ob.step === 2) {
     const cnt = ob.stats.length;
-    const chips = STAT_CATEGORIES.map(cat => {
+    const chips = getStatCategories().map(cat => {
       const sel = ob.stats.find(x => x.category === cat.name);
       const isOpen = ob_openCategory === cat.name;
       const bubbles = isOpen ? cat.subs.map(sub => `
@@ -733,7 +840,7 @@ async function finishOb() {
   const name = (document.getElementById('ob-name')?.value || ob.displayName).trim();
   const errEl = document.getElementById('ob-error');
   errEl.style.display = 'none';
-  if (!name) { errEl.textContent = 'Введи имя'; errEl.style.display = 'block'; return; }
+  if (!name) { errEl.textContent = t('name_error'); errEl.style.display = 'block'; return; }
 
   const statsPayload = ob.stats.map(s => ({ name: s.name, icon: s.icon, frequency_days: s.freq || 1 }));
   const pending = window._pendingAuth;
@@ -754,7 +861,7 @@ async function finishOb() {
       state.activities = [];
       showDashboard();
     } catch (e) {
-      errEl.textContent = e.data?.error || 'Ошибка регистрации';
+      errEl.textContent = e.data?.error || t('err_register');
       errEl.style.display = 'block';
     }
     return;
@@ -767,7 +874,7 @@ async function finishOb() {
     state.activities = [];
     showDashboard();
   } catch (e) {
-    errEl.textContent = e.data?.error || 'Ошибка создания персонажа';
+    errEl.textContent = e.data?.error || t('err_create_char');
     errEl.style.display = 'block';
   }
 }
@@ -808,10 +915,13 @@ function showDashboard() {
             <span>${t('add_stat')}</span>
           </div>
           <div class="user-menu-item" onclick="toggleTheme();closeUserMenu()">
-            <span>${getTheme() === 'dark' ? '☀️' : '🌙'}</span><span>${getTheme() === 'dark' ? (getLang()==='ru'?'Светлая тема':'Light theme') : (getLang()==='ru'?'Тёмная тема':'Dark theme')}</span>
+            <span>${getTheme() === 'dark' ? '☀️' : '🌙'}</span><span>${getTheme() === 'dark' ? t('theme_light') : t('theme_dark')}</span>
           </div>
           <div class="user-menu-item" onclick="toggleLang();closeUserMenu()">
             <span>🌐</span><span>${getLang() === 'ru' ? 'English' : 'Русский'}</span>
+          </div>
+          <div class="user-menu-item" id="push-menu-item" onclick="togglePushNotifications()">
+            <span id="push-menu-icon">🔔</span><span id="push-menu-label">${t('push_enable')}</span>
           </div>
           <div class="user-menu-divider"></div>
           <div class="user-menu-item disabled">
@@ -846,6 +956,7 @@ function showDashboard() {
   renderActivities();
   loadStreak();
   loadAchievements();
+  getPushSubscription().then(sub => updatePushMenuUI(!!sub)).catch(() => {});
 }
 
 function renderStatCards() {
@@ -868,7 +979,7 @@ function renderStatCards() {
         <div class="xp-bar-fill" style="width:${(fill*100).toFixed(1)}%"></div>
       </div>
       <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-variant-numeric:tabular-nums">
-        до Lv.${(s.stat_level||1)+1}: ${xpNext} XP
+        ${t('to_level', (s.stat_level||1)+1, xpNext)}
       </div>
       <button class="btn-log" id="bl-${s.id}" onclick="openLogModal('${s.id}','${esc(s.name)}','${s.icon}')">
         ${t('write_btn')}
@@ -878,8 +989,8 @@ function renderStatCards() {
 
   if (!state.stats.length) {
     grid.innerHTML = `<div style="text-align:center;padding:32px 0;">
-      <p class="text-muted" style="margin-bottom:16px;">Нет навыков. Добавь первый!</p>
-      <button class="btn btn-primary" onclick="openAddStatModal()">+ Добавить навык</button>
+      <p class="text-muted" style="margin-bottom:16px;">${t('no_stats')}</p>
+      <button class="btn btn-primary" onclick="openAddStatModal()">${t('add_stat')}</button>
     </div>`;
   }
 }
@@ -908,7 +1019,7 @@ function renderActivities() {
     </div>`).join('');
   if (moreEl) {
     if (visible.length < state.activities.length) {
-      moreEl.innerHTML = `<button class="btn btn-ghost" style="width:100%;margin-top:12px;font-size:14px;" onclick="loadMoreActivities()">${getLang()==='ru'?'Показать ещё':'Show more'}</button>`;
+      moreEl.innerHTML = `<button class="btn btn-ghost" style="width:100%;margin-top:12px;font-size:14px;" onclick="loadMoreActivities()">${t('show_more')}</button>`;
     } else {
       moreEl.innerHTML = '';
     }
@@ -991,14 +1102,14 @@ function renderAddStatModal() {
   const backdrop = document.getElementById('add-stat-modal');
   if (!backdrop) return;
 
-  const catChips = STAT_CATEGORIES.map(cat => {
+  const catChips = getStatCategories().map(cat => {
     const selected = addStatCtx.categoryName === cat.name;
     return `<div class="stat-chip ${selected?'selected':''}" onclick="selectAddCategory('${esc(cat.name)}','${esc(cat.icon)}')">
       <span>${cat.icon}</span><span>${esc(cat.name)}</span>
     </div>`;
   }).join('');
 
-  const cat = STAT_CATEGORIES.find(c => c.name === addStatCtx.categoryName);
+  const cat = getStatCategories().find(c => c.name === addStatCtx.categoryName);
   const subBubbles = cat ? cat.subs.map(sub => `
     <div class="sub-bubble ${addStatCtx.name === sub.name ? 'selected' : ''}"
          onclick="selectAddSub('${esc(sub.name)}','${esc(sub.icon)}')">
@@ -1070,7 +1181,7 @@ async function submitAddStat() {
     showToast('✨', t('stat_added', addStatCtx.name));
   } catch (e) {
     if (errEl) {
-      errEl.textContent = e.data?.error || 'Ошибка добавления';
+      errEl.textContent = e.data?.error || t('err_add');
       errEl.style.display = 'block';
     }
   }
@@ -1094,8 +1205,8 @@ function showConfirm(title, message, onOk) {
       <div class="confirm-title">${title}</div>
       <p>${message}</p>
       <div class="confirm-actions">
-        <button class="btn btn-ghost" onclick="document.getElementById('confirm-modal').remove()">${getLang()==='ru'?'Отмена':'Cancel'}</button>
-        <button class="btn btn-primary" id="confirm-ok-btn">${getLang()==='ru'?'Удалить':'Delete'}</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('confirm-modal').remove()">${t('cancel')}</button>
+        <button class="btn btn-primary" id="confirm-ok-btn">${t('delete_btn')}</button>
       </div>
     </div>`;
   document.body.appendChild(backdrop);
@@ -1106,7 +1217,7 @@ function showConfirm(title, message, onOk) {
 
 async function deleteStat(statId, statName) {
   showConfirm(
-    getLang()==='ru' ? 'Удалить навык?' : 'Delete skill?',
+    t('delete_skill'),
     t('del_confirm', statName),
     async () => {
       try {
@@ -1115,7 +1226,7 @@ async function deleteStat(statId, statName) {
         renderStatCards();
         showToast('🗑️', t('stat_deleted', statName));
       } catch (e) {
-        showToast('⚠️', e.data?.error || 'Не удалось удалить');
+        showToast('⚠️', e.data?.error || t('err_delete'));
       }
     }
   );
@@ -1210,7 +1321,7 @@ async function submitLog() {
 
     const xpNext = xpRequired(level + 1) - totalXP;
     const lbl = document.getElementById('xp-label');
-    if (lbl) lbl.textContent = `${totalXP.toLocaleString()} XP · до Lv.${level+1}: ${xpNext.toLocaleString()} XP`;
+    if (lbl) lbl.textContent = t('xp_label', totalXP, level+1, xpNext);
 
     if (result.character_level_up) {
       setArcFill('main', 0);
@@ -1275,12 +1386,12 @@ async function exportCSV() {
       api('GET', '/activities?limit=100'),
     ]);
 
-    const rows = [['Дата', 'XP за день']];
+    const rows = [[t('csv_date'), t('csv_xp_day')]];
     (history.data || []).forEach(d => rows.push([d.day, d.xp]));
     rows.push([]);
-    rows.push(['Дата', 'Навык', 'Описание', 'XP']);
+    rows.push([t('csv_date'), t('csv_skill'), t('csv_desc'), 'XP']);
     (Array.isArray(activities) ? activities : []).forEach(a =>
-      rows.push([new Date(a.logged_at).toLocaleDateString('ru'), a.stat_name, a.description, a.xp_earned])
+      rows.push([new Date(a.logged_at).toLocaleDateString(getLang() === 'en' ? 'en-US' : 'ru-RU'), a.stat_name, a.description, a.xp_earned])
     );
 
     const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
@@ -1290,7 +1401,7 @@ async function exportCSV() {
     a.href = url; a.download = 'arkhe-export.csv';
     document.body.appendChild(a); a.click();
     setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
-  } catch { showToast('⚠️', 'Ошибка экспорта'); }
+  } catch { showToast('⚠️', t('err_export')); }
 }
 
 // ── Achievements (Task 7) ─────────────────────────────────────────────────────
@@ -1486,6 +1597,81 @@ function initCursor() {
   loop();
 }
 
+// ── Push Notifications ────────────────────────────────────────────────────────
+
+const PUSH_SUB_KEY = 'arkhe_push_subscribed';
+
+function pushSupported() {
+  return 'serviceWorker' in navigator && 'PushManager' in window;
+}
+
+async function getPushSubscription() {
+  if (!pushSupported()) return null;
+  const reg = await navigator.serviceWorker.ready;
+  return reg.pushManager.getSubscription();
+}
+
+async function initPush() {
+  if (!pushSupported()) return;
+  await navigator.serviceWorker.register('/sw.js');
+  const sub = await getPushSubscription();
+  updatePushMenuUI(!!sub);
+}
+
+function updatePushMenuUI(subscribed) {
+  const label = document.getElementById('push-menu-label');
+  const icon  = document.getElementById('push-menu-icon');
+  if (!label) return;
+  label.textContent = t(subscribed ? 'push_disable' : 'push_enable').replace(/^[^\s]+\s/, '');
+  if (icon) icon.textContent = subscribed ? '🔕' : '🔔';
+}
+
+async function togglePushNotifications() {
+  closeUserMenu();
+  if (!pushSupported()) { alert(t('push_unsupported')); return; }
+
+  const sub = await getPushSubscription();
+  if (sub) {
+    await sub.unsubscribe();
+    await api('DELETE', '/push/subscribe', { endpoint: sub.endpoint }).catch(() => {});
+    localStorage.removeItem(PUSH_SUB_KEY);
+    updatePushMenuUI(false);
+    return;
+  }
+
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted') { alert(t('push_denied')); return; }
+
+  try {
+    const { public_key, enabled } = await api('GET', '/push/vapid-key');
+    if (!enabled) return;
+
+    const reg = await navigator.serviceWorker.ready;
+    const newSub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(public_key),
+    });
+
+    const json = newSub.toJSON();
+    await api('POST', '/push/subscribe', {
+      endpoint: json.endpoint,
+      p256dh:   json.keys.p256dh,
+      auth:     json.keys.auth,
+    });
+    localStorage.setItem(PUSH_SUB_KEY, '1');
+    updatePushMenuUI(true);
+  } catch (e) {
+    console.error('push subscribe failed', e);
+  }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = atob(base64);
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
+}
+
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => { applyTheme(getTheme()); init(); initCursor(); startVortex(); });
+document.addEventListener('DOMContentLoaded', () => { applyTheme(getTheme()); init(); initCursor(); startVortex(); initPush(); });

@@ -53,6 +53,7 @@ func main() {
 	activityRepo := postgres.NewActivityRepo(pool)
 	streakRepo := postgres.NewStreakRepo(pool)
 	achievementRepo := postgres.NewAchievementRepo(pool)
+	pushRepo := postgres.NewPushRepo(pool)
 
 	// Usecases
 	authUC := usecase.NewAuthUsecase(userRepo, charRepo, cfg.JWTSecret, cfg.JWTTTLHours)
@@ -61,6 +62,12 @@ func main() {
 	streakUC := usecase.NewStreakUsecase(streakRepo, statRepo)
 	achievementUC := usecase.NewAchievementUsecase(achievementRepo, activityRepo, charRepo, streakRepo)
 	activityUC := usecase.NewActivityUsecase(activityRepo, statRepo, charRepo, streakUC, achievementUC)
+	pushUC := usecase.NewPushUsecase(pushRepo, cfg.VAPIDPublicKey, cfg.VAPIDPrivateKey, cfg.VAPIDSubject)
+
+	if pushUC.Enabled() {
+		pushUC.StartScheduler(ctx)
+		slog.Info("push notifications enabled")
+	}
 
 	// Handlers
 	analyticsH := handler.NewAnalyticsHandler(activityRepo, charRepo, streakRepo)
@@ -68,7 +75,7 @@ func main() {
 
 	webDir := filepath.Join(rootDir, "web")
 	router := adapterhttp.NewRouter(
-		authUC, characterUC, statUC, activityUC, analyticsH, achievementH,
+		authUC, characterUC, statUC, activityUC, analyticsH, achievementH, pushUC,
 		cfg.CORSOrigins, webDir,
 	)
 

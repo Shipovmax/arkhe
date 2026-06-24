@@ -18,6 +18,7 @@ func NewRouter(
 	activityUC *usecase.ActivityUsecase,
 	analyticsH *handler.AnalyticsHandler,
 	achievementH *handler.AchievementHandler,
+	pushUC *usecase.PushUsecase,
 	corsOrigins []string,
 	webDir string,
 ) http.Handler {
@@ -28,6 +29,7 @@ func NewRouter(
 	charH := handler.NewCharacterHandler(characterUC)
 	statH := handler.NewStatHandler(statUC)
 	actH := handler.NewActivityHandler(activityUC)
+	pushH := handler.NewPushHandler(pushUC)
 
 	// Auth middleware factory
 	authMiddleware := middleware.Auth(func(token string) (string, error) {
@@ -68,6 +70,11 @@ func NewRouter(
 	mux.Handle("GET /api/v1/analytics/stat-growth", authMiddleware(http.HandlerFunc(analyticsH.StatGrowth)))
 
 	mux.Handle("GET /api/v1/achievements", authMiddleware(http.HandlerFunc(achievementH.List)))
+
+	// Push notification routes
+	mux.HandleFunc("GET /api/v1/push/vapid-key", pushH.GetVAPIDKey)
+	mux.Handle("POST /api/v1/push/subscribe", authMiddleware(http.HandlerFunc(pushH.Subscribe)))
+	mux.Handle("DELETE /api/v1/push/subscribe", authMiddleware(http.HandlerFunc(pushH.Unsubscribe)))
 
 	// Static files
 	mux.Handle("/", http.FileServer(http.Dir(webDir)))
