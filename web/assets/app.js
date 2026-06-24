@@ -151,6 +151,24 @@ function toggleLang() {
   init();
 }
 
+// ── Theme ─────────────────────────────────────────────────────────────────────
+
+const THEME_KEY = 'arkhe_theme';
+
+function getTheme() {
+  return localStorage.getItem(THEME_KEY) || 'dark';
+}
+
+function applyTheme(theme) {
+  localStorage.setItem(THEME_KEY, theme);
+  document.documentElement.classList.toggle('light', theme === 'light');
+}
+
+function toggleTheme() {
+  applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
+  init();
+}
+
 // ── API ───────────────────────────────────────────────────────────────────────
 
 const API = '/api/v1';
@@ -787,6 +805,9 @@ function showDashboard() {
           <div class="user-menu-item" onclick="openAddStatModal()">
             <span>${t('add_stat')}</span>
           </div>
+          <div class="user-menu-item" onclick="toggleTheme();closeUserMenu()">
+            <span>${getTheme() === 'dark' ? '☀️' : '🌙'}</span><span>${getTheme() === 'dark' ? (getLang()==='ru'?'Светлая тема':'Light theme') : (getLang()==='ru'?'Тёмная тема':'Dark theme')}</span>
+          </div>
           <div class="user-menu-item" onclick="toggleLang();closeUserMenu()">
             <span>🌐</span><span>${getLang() === 'ru' ? 'English' : 'Русский'}</span>
           </div>
@@ -1312,6 +1333,91 @@ function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── Vortex background ─────────────────────────────────────────────────────────
+
+let vortexRaf = null;
+
+function startVortex() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  let canvas = document.getElementById('vortex-bg');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = 'vortex-bg';
+    document.body.insertBefore(canvas, document.body.firstChild);
+  }
+
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const rings = Array.from({ length: 7 }, (_, i) => ({
+    rx:    90 + i * 65,
+    ry:    34 + i * 26,
+    angle: (i * Math.PI) / 3.5,
+    speed: 0.00025 * (i % 2 === 0 ? 1 : -1) * (1 + i * 0.08),
+    alpha: 0.03 + i * 0.008,
+    dash:  i % 2 === 0,
+  }));
+
+  const particles = Array.from({ length: 55 }, () => {
+    const ri = Math.floor(Math.random() * rings.length);
+    return { ri, phase: Math.random() * Math.PI * 2, speed: 0.0015 + Math.random() * 0.0025, a: 0.08 + Math.random() * 0.25, r: 1 + Math.random() * 1.4 };
+  });
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    const cx = W / 2, cy = H * 0.42;
+
+    // ambient center glow
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 260);
+    g.addColorStop(0, 'rgba(37,99,235,0.07)');
+    g.addColorStop(0.5, 'rgba(29,78,216,0.03)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // rings
+    rings.forEach(ring => {
+      ring.angle += ring.speed;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(ring.angle);
+      if (ring.dash) ctx.setLineDash([6, 18]);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, ring.rx, ring.ry, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(96,165,250,${ring.alpha})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    });
+
+    // particles
+    particles.forEach(p => {
+      p.phase += p.speed;
+      const ring = rings[p.ri];
+      const px = cx + Math.cos(p.phase + ring.angle) * ring.rx;
+      const py = cy + Math.sin(p.phase + ring.angle) * ring.ry;
+      ctx.beginPath();
+      ctx.arc(px, py, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(147,197,253,${p.a})`;
+      ctx.fill();
+    });
+
+    vortexRaf = requestAnimationFrame(draw);
+  }
+
+  if (vortexRaf) cancelAnimationFrame(vortexRaf);
+  draw();
+}
+
 // ── Custom Cursor ─────────────────────────────────────────────────────────────
 
 function initCursor() {
@@ -1353,4 +1459,4 @@ function initCursor() {
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => { init(); initCursor(); });
+document.addEventListener('DOMContentLoaded', () => { applyTheme(getTheme()); init(); initCursor(); startVortex(); });

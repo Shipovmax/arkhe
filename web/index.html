@@ -9,7 +9,73 @@
   <meta property="og:description" content="Arkhe превращает привычки в игру. И игры не бросают.">
   <meta property="og:image" content="/assets/og.png">
   <link rel="stylesheet" href="/assets/style.css">
-  <style>body { cursor: none; } a, button, [onclick] { cursor: none; }</style>
+  <style>
+    body { cursor: none; } a, button, [onclick] { cursor: none; }
+
+    .landing-hero {
+      position: relative;
+      padding: 0;
+      min-height: 92vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .hero-bg-layers {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .hero-bg-layer {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+      background-size: cover;
+      background-position: center;
+    }
+    .hero-bg-layer.active { opacity: 1; }
+
+    /* Three atmospheric gradient scenes */
+    #hbg0 {
+      background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(29,78,216,0.18) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 40% at 80% 70%, rgba(96,165,250,0.08) 0%, transparent 60%),
+                  linear-gradient(160deg, #07071a 0%, #0b0b22 100%);
+    }
+    #hbg1 {
+      background: radial-gradient(ellipse 70% 50% at 30% 60%, rgba(37,99,235,0.2) 0%, transparent 65%),
+                  radial-gradient(ellipse 50% 40% at 70% 30%, rgba(147,197,253,0.06) 0%, transparent 55%),
+                  linear-gradient(200deg, #060614 0%, #0d0d25 100%);
+    }
+    #hbg2 {
+      background: radial-gradient(ellipse 90% 55% at 60% 50%, rgba(29,78,216,0.15) 0%, transparent 70%),
+                  radial-gradient(ellipse 35% 45% at 20% 80%, rgba(96,165,250,0.1) 0%, transparent 60%),
+                  linear-gradient(140deg, #080818 0%, #0a0a20 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 80px 24px;
+    }
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.4;
+      animation: fadeIn 1s ease 1.5s both;
+    }
+    .hero-scroll-hint span { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); }
+    .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, transparent, var(--text-muted)); animation: scrollPulse 2s ease infinite; }
+    @keyframes scrollPulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+  </style>
   <style>
     /* ── Landing-only overrides ── */
     .hero-punch {
@@ -138,24 +204,36 @@
     </nav>
 
     <!-- Hero -->
-    <section class="hero" style="padding:72px 0 56px;">
-      <div class="pain-list">
-        <span class="pain-tag">тренировки</span>
-        <span class="pain-tag" style="animation-delay:80ms">чтение</span>
-        <span class="pain-tag" style="animation-delay:160ms">язык</span>
-        <span class="pain-tag" style="animation-delay:240ms">медитация</span>
-        <span class="pain-tag" style="animation-delay:320ms">подъём в 7</span>
+    <section class="hero landing-hero" id="landing-hero">
+      <div class="hero-bg-layers">
+        <div class="hero-bg-layer" id="hbg0"></div>
+        <div class="hero-bg-layer" id="hbg1"></div>
+        <div class="hero-bg-layer" id="hbg2"></div>
       </div>
-      <h1 class="hero-punch">
-        <span class="dim">Ты снова</span><br>
-        <span class="hit">забросил.</span>
-      </h1>
-      <p class="hero-sub">
-        <strong>Arkhe превращает привычки в игру.<br>И игры не бросают.</strong>
-      </p>
-      <a href="/app.html" class="btn btn-primary" style="font-size:18px;padding:16px 40px;">
-        Хватит. Попробовать →
-      </a>
+      <div class="hero-content">
+        <div class="pain-list">
+          <span class="pain-tag">тренировки</span>
+          <span class="pain-tag" style="animation-delay:80ms">чтение</span>
+          <span class="pain-tag" style="animation-delay:160ms">язык</span>
+          <span class="pain-tag" style="animation-delay:240ms">медитация</span>
+          <span class="pain-tag" style="animation-delay:320ms">подъём в 7</span>
+        </div>
+        <h1 class="hero-punch">
+          <span class="dim">Ты снова</span><br>
+          <span class="hit">забросил.</span>
+        </h1>
+        <p class="hero-sub">
+          Мы превращаем твои привычки в игру.<br>
+          <strong>Мы даём тебе мотивацию каждый день —<br>а ты получаешь результат и дисциплину.</strong>
+        </p>
+        <a href="/app.html" class="btn btn-primary" style="font-size:18px;padding:16px 40px;">
+          Хватит. Попробовать →
+        </a>
+      </div>
+      <div class="hero-scroll-hint">
+        <span>скролл</span>
+        <div class="scroll-arrow"></div>
+      </div>
     </section>
 
     <!-- How it works -->
@@ -258,6 +336,53 @@
       </div>
     </footer>
   </div>
+  <script>
+    // Apply saved theme
+    if (localStorage.getItem('arkhe_theme') === 'light') {
+      document.documentElement.classList.add('light');
+    }
+
+    // Hero background crossfade on scroll + mouse parallax
+    (function() {
+      const layers = [document.getElementById('hbg0'), document.getElementById('hbg1'), document.getElementById('hbg2')];
+      let current = 0;
+      layers[0].classList.add('active');
+
+      // Auto-cycle every 4s
+      let interval = setInterval(() => {
+        layers[current].classList.remove('active');
+        current = (current + 1) % layers.length;
+        layers[current].classList.add('active');
+      }, 4000);
+
+      // Pause on interaction, resume after
+      document.getElementById('landing-hero').addEventListener('click', () => {
+        clearInterval(interval);
+        setTimeout(() => {
+          interval = setInterval(() => {
+            layers[current].classList.remove('active');
+            current = (current + 1) % layers.length;
+            layers[current].classList.add('active');
+          }, 4000);
+        }, 8000);
+      });
+
+      // Mouse parallax on hero
+      const hero = document.getElementById('landing-hero');
+      hero.addEventListener('mousemove', e => {
+        const rect = hero.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+        const y = ((e.clientY - rect.top)  / rect.height - 0.5) * 2;
+        layers.forEach((l, i) => {
+          const depth = (i + 1) * 12;
+          l.style.transform = `translate(${x * depth}px, ${y * depth * 0.5}px) scale(1.08)`;
+        });
+      });
+      hero.addEventListener('mouseleave', () => {
+        layers.forEach(l => { l.style.transform = 'translate(0,0) scale(1)'; });
+      });
+    })();
+  </script>
   <script>
     if (!window.matchMedia('(pointer: coarse)').matches) {
       const dot = document.getElementById('cursor-dot');
