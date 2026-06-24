@@ -17,6 +17,7 @@ func NewRouter(
 	statUC *usecase.StatUsecase,
 	activityUC *usecase.ActivityUsecase,
 	analyticsH *handler.AnalyticsHandler,
+	achievementH *handler.AchievementHandler,
 	corsOrigins []string,
 	webDir string,
 ) http.Handler {
@@ -65,6 +66,8 @@ func NewRouter(
 	mux.Handle("GET /api/v1/analytics/summary", authMiddleware(http.HandlerFunc(analyticsH.Summary)))
 	mux.Handle("GET /api/v1/analytics/xp-history", authMiddleware(http.HandlerFunc(analyticsH.XPHistory)))
 	mux.Handle("GET /api/v1/analytics/stat-growth", authMiddleware(http.HandlerFunc(analyticsH.StatGrowth)))
+
+	mux.Handle("GET /api/v1/achievements", authMiddleware(http.HandlerFunc(achievementH.List)))
 
 	// Static files
 	mux.Handle("/", http.FileServer(http.Dir(webDir)))

@@ -62,12 +62,13 @@ func main() {
 	achievementUC := usecase.NewAchievementUsecase(achievementRepo, activityRepo, charRepo, streakRepo)
 	activityUC := usecase.NewActivityUsecase(activityRepo, statRepo, charRepo, streakUC, achievementUC)
 
-	// Analytics handler
+	// Handlers
 	analyticsH := handler.NewAnalyticsHandler(activityRepo, charRepo, streakRepo)
+	achievementH := handler.NewAchievementHandler(achievementRepo)
 
 	webDir := filepath.Join(rootDir, "web")
 	router := adapterhttp.NewRouter(
-		authUC, characterUC, statUC, activityUC, analyticsH,
+		authUC, characterUC, statUC, activityUC, analyticsH, achievementH,
 		cfg.CORSOrigins, webDir,
 	)
 

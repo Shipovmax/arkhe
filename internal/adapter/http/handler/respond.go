@@ -33,6 +33,8 @@ func domainErrStatus(err error) int {
 		return http.StatusForbidden
 	case domain.ErrInvalidInput:
 		return http.StatusBadRequest
+	case domain.ErrTooSoon:
+		return http.StatusTooManyRequests
 	default:
 		return http.StatusInternalServerError
 	}

@@ -72,6 +72,17 @@ func (u *ActivityUsecase) Log(ctx context.Context, in LogInput) (*LogResult, err
 		return nil, domain.ErrForbidden
 	}
 
+	// Prevent logging more than once per period
+	today := time.Now().UTC().Truncate(24 * time.Hour)
+	periodStart := today.AddDate(0, 0, -(stat.FrequencyDays - 1))
+	alreadyLogged, err := u.activities.HasRecentActivity(ctx, stat.ID, periodStart)
+	if err != nil {
+		return nil, err
+	}
+	if alreadyLogged {
+		return nil, domain.ErrTooSoon
+	}
+
 	// Update per-stat streak and determine XP multipliers
 	loggedInFirstHalf, streakBroke, err := u.streakUC.UpdateStatStreak(ctx, stat)
 	if err != nil {

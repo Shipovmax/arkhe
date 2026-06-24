@@ -1,12 +1,161 @@
 'use strict';
 
+// ── i18n ──────────────────────────────────────────────────────────────────────
+
+const LANG_KEY = 'arkhe_lang';
+
+const I18N = {
+  ru: {
+    tagline:        'Стань персонажем своей видеоигры',
+    login:          'Войти',
+    register:       'Регистрация',
+    email:          'Email',
+    password:       'Пароль (мин. 8 символов)',
+    create_account: 'Создать аккаунт',
+    after_reg:      'После регистрации настроите персонажа',
+    choose_class:   'Выбери класс',
+    class_hint:     'Это тематика твоего персонажа',
+    student:        'Студент', student_desc: 'Прокачиваю себя в универе',
+    worker:         'Работяга', worker_desc: 'Расту профессионально',
+    schoolkid:      'Школьник', schoolkid_desc: 'Учусь и развиваюсь',
+    choose_stats:   'Выбери навыки',
+    stats_hint:     '3–5 направлений. Нажми — выбери конкретно что делаешь.',
+    next:           'Далее →',
+    whats_your_name:'Как тебя зовут?',
+    name_hint:      'Имя персонажа на дашборде',
+    char_name:      'Имя персонажа',
+    start_btn:      'Начать прокачку 🚀',
+    level:          'уровень',
+    streak_days:    'дней стрика',
+    last_activities:'Последние активности',
+    no_activities:  'Активностей пока нет. Запиши первую!',
+    add_stat:       '+ Добавить навык',
+    subscription:   'Подписка',
+    soon:           'скоро',
+    logout:         'Выйти',
+    new_stat:       'Новый навык',
+    choose_dir:     'Выбери направление:',
+    what_you_do:    'Конкретно что делаешь:',
+    frequency:      'Частота:',
+    times_per:      'раз в',
+    day:            'день', days_2_4: 'дня', days_5: 'дней',
+    add_stat_btn:   'Добавить навык',
+    what_did_you_do:'Что сделал?',
+    desc_placeholder:'Описание активности...',
+    write_btn:      'Записать активность',
+    xp_30:         'XP за 30 дней',
+    xp_total:      'XP суммарно',
+    export_csv:    '↓ CSV',
+    achievements:  'Достижения',
+    locked:        'Заблокировано',
+    del_confirm:   (name) => `Удалить навык «${name}»? Все активности по нему останутся в истории.`,
+    max_stats:     'Максимум 5 навыков на Free плане',
+    stat_added:    (name) => `Навык «${name}» добавлен!`,
+    stat_deleted:  (name) => `«${name}» удалён`,
+    level_up:      'Level Up',
+    achievement:   'Достижение',
+    stat_leveled:  (name, lv) => `${name} вырос до Lv.${lv}!`,
+    period_block:  'Уже записано в этом периоде. Возвращайся позже!',
+    err_try_again: 'Ошибка. Попробуй снова.',
+    per_day_str:   (n) => `раз в ${n} ${n===1?'день':n<5?'дня':'дней'}`,
+    streak_label:  (n) => `🔥 Стрик: ${n}`,
+    freq_label:    (n) => `раз в ${n} дн.`,
+    to_level:      (lv, xp) => `до Lv.${lv}: ${xp} XP`,
+    xp_label:      (xp, lv, xpNext) => `${xp.toLocaleString()} XP · до Lv.${lv}: ${xpNext.toLocaleString()} XP`,
+  },
+  en: {
+    tagline:        'Become a character in your own video game',
+    login:          'Log in',
+    register:       'Sign up',
+    email:          'Email',
+    password:       'Password (min. 8 characters)',
+    create_account: 'Create account',
+    after_reg:      'You\'ll set up your character after signing up',
+    choose_class:   'Choose a class',
+    class_hint:     'This is the theme of your character',
+    student:        'Student', student_desc: 'Leveling up at uni',
+    worker:         'Worker', worker_desc: 'Growing professionally',
+    schoolkid:      'Schoolkid', schoolkid_desc: 'Learning and growing',
+    choose_stats:   'Choose skills',
+    stats_hint:     '3–5 areas. Tap to pick what you actually do.',
+    next:           'Next →',
+    whats_your_name:'What\'s your name?',
+    name_hint:      'Character name on the dashboard',
+    char_name:      'Character name',
+    start_btn:      'Start leveling up 🚀',
+    level:          'level',
+    streak_days:    'day streak',
+    last_activities:'Recent activities',
+    no_activities:  'No activities yet. Log your first!',
+    add_stat:       '+ Add skill',
+    subscription:   'Subscription',
+    soon:           'soon',
+    logout:         'Log out',
+    new_stat:       'New skill',
+    choose_dir:     'Choose a direction:',
+    what_you_do:    'What specifically do you do:',
+    frequency:      'Frequency:',
+    times_per:      'every',
+    day:            'day', days_2_4: 'days', days_5: 'days',
+    add_stat_btn:   'Add skill',
+    what_did_you_do:'What did you do?',
+    desc_placeholder:'Activity description...',
+    write_btn:      'Log activity',
+    xp_30:         'XP over 30 days',
+    xp_total:      'XP total',
+    export_csv:    '↓ CSV',
+    achievements:  'Achievements',
+    locked:        'Locked',
+    del_confirm:   (name) => `Delete skill «${name}»? All logged activities will remain in history.`,
+    max_stats:     'Maximum 5 skills on the Free plan',
+    stat_added:    (name) => `Skill «${name}» added!`,
+    stat_deleted:  (name) => `«${name}» deleted`,
+    level_up:      'Level Up',
+    achievement:   'Achievement',
+    stat_leveled:  (name, lv) => `${name} reached Lv.${lv}!`,
+    period_block:  'Already logged this period. Come back later!',
+    err_try_again: 'Error. Please try again.',
+    per_day_str:   (n) => `every ${n} ${n===1?'day':'days'}`,
+    streak_label:  (n) => `🔥 Streak: ${n}`,
+    freq_label:    (n) => `every ${n} day${n===1?'':'s'}`,
+    to_level:      (lv, xp) => `to Lv.${lv}: ${xp} XP`,
+    xp_label:      (xp, lv, xpNext) => `${xp.toLocaleString()} XP · to Lv.${lv}: ${xpNext.toLocaleString()} XP`,
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  if (stored === 'ru' || stored === 'en') return stored;
+  return navigator.language?.startsWith('ru') ? 'ru' : 'en';
+}
+
+function setLang(lang) {
+  localStorage.setItem(LANG_KEY, lang);
+}
+
+function t(key, ...args) {
+  const lang = getLang();
+  const val = I18N[lang]?.[key] ?? I18N.ru[key] ?? key;
+  return typeof val === 'function' ? val(...args) : val;
+}
+
+function renderLangSwitcher() {
+  const lang = getLang();
+  return `<button class="lang-btn" onclick="toggleLang()" title="Switch language">${lang === 'ru' ? 'EN' : 'RU'}</button>`;
+}
+
+function toggleLang() {
+  setLang(getLang() === 'ru' ? 'en' : 'ru');
+  init();
+}
+
 // ── API ───────────────────────────────────────────────────────────────────────
 
 const API = '/api/v1';
 
-const getToken  = ()  => localStorage.getItem('arkhe_token');
-const setToken  = t   => localStorage.setItem('arkhe_token', t);
-const clearToken = () => localStorage.removeItem('arkhe_token');
+const getToken   = ()  => localStorage.getItem('arkhe_token');
+const setToken   = t   => localStorage.setItem('arkhe_token', t);
+const clearToken = ()  => localStorage.removeItem('arkhe_token');
 
 async function api(method, path, body) {
   const headers = { 'Content-Type': 'application/json' };
@@ -41,11 +190,9 @@ function levelFromXP(totalXP) {
 }
 
 // ── Arc XP Ring ───────────────────────────────────────────────────────────────
-// Semicircle: starts at 180° (left), ends at 0° (right). Centre at (100,100), r=80.
-// Arc length for 180° = π * 80 ≈ 251.3
 
 const ARC_R    = 80;
-const ARC_CIRC = Math.PI * ARC_R; // half-circumference for 180° arc
+const ARC_CIRC = Math.PI * ARC_R;
 
 function buildArcSVG(id) {
   return `
@@ -121,7 +268,7 @@ function showLevelUp(newLevel) {
   overlay.className = 'levelup-overlay';
   overlay.innerHTML = `
     <div class="levelup-number">${newLevel}</div>
-    <div class="levelup-sub">Level Up</div>`;
+    <div class="levelup-sub">${t('level_up')}</div>`;
   document.body.appendChild(overlay);
   document.querySelectorAll('.stat-card').forEach((c, i) =>
     setTimeout(() => { c.classList.remove('xp-pulse'); void c.offsetWidth; c.classList.add('xp-pulse'); }, 700 + i * 100));
@@ -187,7 +334,6 @@ function attachPwToggle(inputId) {
     input.type = show ? 'text' : 'password';
     btn.textContent = show ? '🙈' : '👁';
   });
-  // Wrap input if not already wrapped
   if (!input.parentElement.classList.contains('input-wrap')) {
     const wrap = document.createElement('div');
     wrap.className = 'input-wrap';
@@ -225,12 +371,13 @@ function showAuth() {
     <div class="auth-wrap">
       <div class="auth-card">
         <div style="text-align:center;margin-bottom:28px;">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">${renderLangSwitcher()}</div>
           <div class="logo" style="font-size:28px;margin-bottom:6px;">Arkhe</div>
-          <p class="text-muted" style="font-size:14px;">Превратите жизнь в RPG</p>
+          <p class="text-muted" style="font-size:14px;">${t('tagline')}</p>
         </div>
         <div class="auth-tabs">
-          <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Войти</button>
-          <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Регистрация</button>
+          <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">${t('login')}</button>
+          <button class="auth-tab" id="tab-register" onclick="switchTab('register')">${t('register')}</button>
         </div>
         <div id="auth-form"></div>
       </div>
@@ -252,13 +399,13 @@ function renderLoginForm() {
       <div class="field-error"></div>
     </div>
     <div class="form-group">
-      <label>Пароль</label>
+      <label>${t('login')}</label>
       <div class="input-wrap">
         <input class="input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
       </div>
     </div>
     <div id="auth-error" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"></div>
-    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Войти</button>`;
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">${t('login')}</button>`;
   attachPwToggle('login-password');
 }
 
@@ -270,15 +417,15 @@ function renderRegisterForm() {
       <div class="field-error"></div>
     </div>
     <div class="form-group">
-      <label>Пароль (мин. 8 символов)</label>
+      <label>${t('password')}</label>
       <div class="input-wrap">
         <input class="input" id="reg-password" type="password" placeholder="••••••••" autocomplete="new-password">
       </div>
       <div class="field-error"></div>
     </div>
     <div id="auth-error" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"></div>
-    <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">После регистрации настроите персонажа</p>
-    <button class="btn btn-primary" style="width:100%" onclick="doRegister()">Создать аккаунт</button>`;
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">${t('after_reg')}</p>
+    <button class="btn btn-primary" style="width:100%" onclick="doRegister()">${t('create_account')}</button>`;
   attachPwToggle('reg-password');
 }
 
@@ -343,16 +490,62 @@ async function doRegister() {
 
 let ob = { step: 1, class: null, stats: [], displayName: '' };
 
-const PRESET_STATS = [
-  { name: 'Физическая форма',  icon: '💪' },
-  { name: 'Умственное развитие', icon: '🧠' },
-  { name: 'Дисциплина',        icon: '🎯' },
-  { name: 'Начитанность',      icon: '📚' },
-  { name: 'Социальные навыки', icon: '🤝' },
+// Категории с подкатегориями
+const STAT_CATEGORIES = [
+  {
+    name: 'Физическая форма', icon: '💪',
+    subs: [
+      { name: 'Зал', icon: '🏋️' },
+      { name: 'Бег', icon: '🏃' },
+      { name: 'Йога', icon: '🧘' },
+      { name: 'Велосипед', icon: '🚴' },
+      { name: 'Плавание', icon: '🏊' },
+    ],
+  },
+  {
+    name: 'Умственное развитие', icon: '🧠',
+    subs: [
+      { name: 'Курс / обучение', icon: '🎓' },
+      { name: 'Изучение языка', icon: '🗣️' },
+      { name: 'Решение задач', icon: '🧩' },
+      { name: 'Медитация', icon: '🪷' },
+    ],
+  },
+  {
+    name: 'Дисциплина', icon: '🎯',
+    subs: [
+      { name: 'Ранний подъём', icon: '🌅' },
+      { name: 'Без соцсетей', icon: '📵' },
+      { name: 'Планирование дня', icon: '📋' },
+      { name: 'Холодный душ', icon: '🚿' },
+    ],
+  },
+  {
+    name: 'Начитанность', icon: '📚',
+    subs: [
+      { name: 'Книга', icon: '📖' },
+      { name: 'Статья / блог', icon: '📰' },
+      { name: 'Подкаст', icon: '🎙️' },
+      { name: 'Научная статья', icon: '🔬' },
+    ],
+  },
+  {
+    name: 'Социальные навыки', icon: '🤝',
+    subs: [
+      { name: 'Нетворкинг', icon: '🌐' },
+      { name: 'Выступление', icon: '🎤' },
+      { name: 'Помощь другому', icon: '🫂' },
+      { name: 'Новое знакомство', icon: '👋' },
+    ],
+  },
 ];
+
+// Состояние пузырьков (какая категория раскрыта)
+let ob_openCategory = null;
 
 function showOnboarding() {
   ob = { step: 1, class: null, stats: [], displayName: '' };
+  ob_openCategory = null;
   document.getElementById('app').innerHTML = `
     <div class="onboarding-wrap">
       <div class="onboarding-card">
@@ -373,71 +566,126 @@ function renderObStep() {
 
   if (ob.step === 1) {
     el.innerHTML = `
-      <h3 style="margin-bottom:6px;">Выбери класс</h3>
-      <p class="text-muted" style="font-size:14px;margin-bottom:4px;">Это тематика твоего персонажа</p>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">${renderLangSwitcher()}</div>
+      <h3 style="margin-bottom:6px;">${t('choose_class')}</h3>
+      <p class="text-muted" style="font-size:14px;margin-bottom:4px;">${t('class_hint')}</p>
       <div class="class-grid">
         <div class="class-card ${ob.class==='student'?'selected':''}" onclick="selClass('student')">
-          <div class="class-icon">🎓</div><div class="class-name">Студент</div>
-          <div class="class-desc">Прокачиваю себя в универе</div>
+          <div class="class-icon">🎓</div>
+          <div><div class="class-name">${t('student')}</div><div class="class-desc">${t('student_desc')}</div></div>
         </div>
         <div class="class-card ${ob.class==='worker'?'selected':''}" onclick="selClass('worker')">
-          <div class="class-icon">💼</div><div class="class-name">Работяга</div>
-          <div class="class-desc">Расту профессионально</div>
+          <div class="class-icon">💼</div>
+          <div><div class="class-name">${t('worker')}</div><div class="class-desc">${t('worker_desc')}</div></div>
         </div>
         <div class="class-card ${ob.class==='schoolkid'?'selected':''}" onclick="selClass('schoolkid')">
-          <div class="class-icon">📖</div><div class="class-name">Школьник</div>
-          <div class="class-desc">Учусь и развиваюсь</div>
+          <div class="class-icon">📖</div>
+          <div><div class="class-name">${t('schoolkid')}</div><div class="class-desc">${t('schoolkid_desc')}</div></div>
         </div>
       </div>
-      <button class="btn btn-primary" style="width:100%" onclick="nextObStep()" ${!ob.class?'disabled':''}>Далее →</button>`;
+      <button class="btn btn-primary" style="width:100%" onclick="nextObStep()" ${!ob.class?'disabled':''}>${t('next')}</button>`;
 
   } else if (ob.step === 2) {
-    const chips = PRESET_STATS.map(s => {
-      const sel = ob.stats.find(x => x.name === s.name);
-      return `<div class="stat-chip ${sel?'selected':''}" onclick="toggleStat('${s.name}','${s.icon}')">
-        <span>${s.icon}</span><span>${s.name}</span>
-        ${sel ? `<span style="font-size:11px;color:var(--text-muted);margin-left:4px;">
-          · раз в <input type="number" min="1" max="30" value="${sel.freq||1}"
-            style="width:32px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:1px 4px;font-size:11px;"
-            onclick="event.stopPropagation()" onchange="setFreq('${s.name}',this.value)"> дн.
-        </span>` : ''}
-      </div>`;
-    }).join('');
     const cnt = ob.stats.length;
+    const chips = STAT_CATEGORIES.map(cat => {
+      const sel = ob.stats.find(x => x.category === cat.name);
+      const isOpen = ob_openCategory === cat.name;
+      const bubbles = isOpen ? cat.subs.map(sub => `
+        <div class="sub-bubble ${sel && sel.name === sub.name ? 'selected' : ''}"
+             onclick="selectSub('${esc(cat.name)}','${esc(cat.icon)}','${esc(sub.name)}','${esc(sub.icon)}');event.stopPropagation()">
+          <span>${sub.icon}</span><span>${esc(sub.name)}</span>
+        </div>`).join('') : '';
+
+      return `
+        <div class="stat-chip-wrap">
+          <div class="stat-chip ${sel?'selected':''} ${isOpen?'open':''}"
+               onclick="toggleCategory('${esc(cat.name)}')">
+            <span>${sel ? sel.icon : cat.icon}</span>
+            <span>${sel ? esc(sel.name) : esc(cat.name)}</span>
+            ${sel ? `<span class="chip-check">✓</span>` : `<span class="chip-arrow">${isOpen?'▴':'▾'}</span>`}
+          </div>
+          ${isOpen ? `<div class="sub-bubbles">${bubbles}</div>` : ''}
+        </div>`;
+    }).join('');
+
+    // Frequency picker for selected stats
+    const freqPickers = ob.stats.map(s => `
+      <div class="freq-picker-row">
+        <span>${s.icon} ${esc(s.name)}</span>
+        <div class="freq-picker">
+          <button class="freq-btn" onclick="changeFreq('${esc(s.category)}', -1)" ${s.freq<=1?'disabled':''}>−</button>
+          <div class="freq-num" id="freq-${esc(s.category).replace(/\s/g,'_')}">${s.freq}</div>
+          <button class="freq-btn" onclick="changeFreq('${esc(s.category)}', 1)" ${s.freq>=30?'disabled':''}>+</button>
+          <span class="freq-label">${t('per_day_str', s.freq)}</span>
+        </div>
+      </div>`).join('');
+
     el.innerHTML = `
-      <h3 style="margin-bottom:6px;">Выбери статы</h3>
-      <p class="text-muted" style="font-size:14px;margin-bottom:4px;">3–5 направлений. Укажи как часто планируешь заниматься.</p>
+      <h3 style="margin-bottom:6px;">${t('choose_stats')}</h3>
+      <p class="text-muted" style="font-size:14px;margin-bottom:16px;">${t('stats_hint')}</p>
       <div class="stat-options">${chips}</div>
-      <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="nextObStep()" ${cnt<3||cnt>5?'disabled':''}>Далее →</button>`;
+      ${ob.stats.length ? `<div class="freq-pickers" style="margin-top:16px;">${freqPickers}</div>` : ''}
+      <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="nextObStep()" ${cnt<3||cnt>5?'disabled':''}>
+        ${t('next')} ${cnt>0?`(${cnt}/5)`:''}
+      </button>`;
 
   } else {
     el.innerHTML = `
-      <h3 style="margin-bottom:6px;">Как тебя зовут?</h3>
-      <p class="text-muted" style="font-size:14px;margin-bottom:16px;">Имя персонажа на дашборде</p>
+      <h3 style="margin-bottom:6px;">${t('whats_your_name')}</h3>
+      <p class="text-muted" style="font-size:14px;margin-bottom:16px;">${t('name_hint')}</p>
       <div class="form-group">
-        <label>Имя персонажа</label>
+        <label>${t('char_name')}</label>
         <input class="input" id="ob-name" type="text" placeholder="Например: Иван" maxlength="40"
           value="${esc(ob.displayName)}" oninput="ob.displayName=this.value">
       </div>
       <div id="ob-error" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="finishOb()">Начать прокачку 🚀</button>`;
+      <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="finishOb()">${t('start_btn')}</button>`;
     setTimeout(() => document.getElementById('ob-name')?.focus(), 50);
   }
 }
 
-function selClass(cls) { ob.class = cls; renderObStep(); }
-
-function toggleStat(name, icon) {
-  const idx = ob.stats.findIndex(s => s.name === name);
-  if (idx >= 0) ob.stats.splice(idx, 1);
-  else if (ob.stats.length < 5) ob.stats.push({ name, icon, freq: 1 });
+function toggleCategory(catName) {
+  ob_openCategory = ob_openCategory === catName ? null : catName;
   renderObStep();
 }
 
-function setFreq(name, val) {
-  const s = ob.stats.find(x => x.name === name);
-  if (s) s.freq = Math.max(1, parseInt(val) || 1);
+function selectSub(catName, catIcon, subName, subIcon) {
+  const existing = ob.stats.findIndex(s => s.category === catName);
+  if (existing >= 0) {
+    // Toggle off if same sub selected
+    if (ob.stats[existing].name === subName) {
+      ob.stats.splice(existing, 1);
+      ob_openCategory = null;
+      renderObStep();
+      return;
+    }
+    ob.stats[existing] = { category: catName, name: subName, icon: subIcon, freq: ob.stats[existing].freq };
+  } else {
+    if (ob.stats.length >= 5) return;
+    ob.stats.push({ category: catName, name: subName, icon: subIcon, freq: 1 });
+  }
+  ob_openCategory = null;
+  renderObStep();
 }
+
+function changeFreq(catName, delta) {
+  const s = ob.stats.find(x => x.category === catName);
+  if (!s) return;
+  s.freq = Math.max(1, Math.min(30, s.freq + delta));
+  // Animate the number
+  const key = catName.replace(/\s/g, '_');
+  const el = document.getElementById('freq-' + key);
+  if (el) {
+    el.classList.remove('freq-pop');
+    void el.offsetWidth;
+    el.classList.add('freq-pop');
+    el.textContent = s.freq;
+  }
+  // Re-render to update disabled states and label
+  renderObStep();
+}
+
+function selClass(cls) { ob.class = cls; renderObStep(); }
 
 function nextObStep() { if (ob.step < 3) { ob.step++; renderObStep(); } }
 
@@ -472,7 +720,6 @@ async function finishOb() {
     return;
   }
 
-  // Logged-in user who skipped onboarding
   try {
     const data = await api('POST', '/character', { display_name: name, class: ob.class, stats: statsPayload });
     state.character = data.character;
@@ -504,24 +751,31 @@ function showDashboard() {
             ${buildArcSVG('main')}
             <div class="arc-center">
               <div class="arc-level" id="arc-level">${level}</div>
-              <div class="arc-label">уровень</div>
+              <div class="arc-label">${t('level')}</div>
             </div>
           </div>
           <div class="char-name char-name-btn" id="char-name-btn" onclick="toggleUserMenu(event)" style="margin-top:16px;">
             ${esc(c.display_name)} <span style="font-size:14px;color:var(--text-muted);">▾</span>
           </div>
-          <div class="streak-inline" id="streak-inline">🔥 <span id="streak-val">—</span> дней стрика</div>
+          <div class="streak-inline" id="streak-inline">🔥 <span id="streak-val">—</span> ${t('streak_days')}</div>
           <div class="char-xp-label" id="xp-label">
-            ${totalXP.toLocaleString()} XP · до Lv.${level+1}: ${xpNext.toLocaleString()} XP
+            ${t('xp_label', totalXP, level+1, xpNext)}
           </div>
         </div>
         <div class="user-menu" id="user-menu">
+          <div class="user-menu-item" onclick="openAddStatModal()">
+            <span>＋</span><span>${t('add_stat')}</span>
+          </div>
+          <div class="user-menu-item" onclick="toggleLang();closeUserMenu()">
+            <span>🌐</span><span>${getLang() === 'ru' ? 'English' : 'Русский'}</span>
+          </div>
+          <div class="user-menu-divider"></div>
           <div class="user-menu-item disabled">
-            <span>💎</span><span>Подписка <span style="font-size:11px;color:var(--text-muted);">(скоро)</span></span>
+            <span>💎</span><span>${t('subscription')} <span style="font-size:11px;color:var(--text-muted);">(${t('soon')})</span></span>
           </div>
           <div class="user-menu-divider"></div>
           <div class="user-menu-item danger" onclick="doLogout()">
-            <span>→</span><span>Выйти</span>
+            <span>→</span><span>${t('logout')}</span>
           </div>
         </div>
       </div>
@@ -529,12 +783,15 @@ function showDashboard() {
       <div class="stats-grid" id="stats-grid" style="animation:fadeIn 300ms ease 150ms both"></div>
 
       <div class="activity-feed" style="animation:fadeIn 300ms ease 300ms both">
-        <h3 style="margin-bottom:16px;">Последние активности</h3>
+        <h3 style="margin-bottom:16px;">${t('last_activities')}</h3>
         <div id="activity-list"></div>
       </div>
+
+      <div id="xp-chart-section" style="animation:fadeIn 300ms ease 400ms both;margin-bottom:32px;"></div>
+
+      <div id="achievements-section" style="animation:fadeIn 300ms ease 500ms both;"></div>
     </div>`;
 
-  // Animate arc after paint
   requestAnimationFrame(() => {
     setTimeout(() => setArcFill('main', xpFillRatio(totalXP, level)), 200);
   });
@@ -542,6 +799,8 @@ function showDashboard() {
   renderStatCards();
   renderActivities();
   loadStreak();
+  loadXPChart();
+  loadAchievements();
 }
 
 function renderStatCards() {
@@ -554,9 +813,12 @@ function renderStatCards() {
     <div class="stat-card" id="sc-${s.id}" style="animation-delay:${i*80}ms">
       <div class="stat-header">
         <div class="stat-icon-name"><span>${s.icon}</span><span>${esc(s.name)}</span></div>
-        <span class="stat-level-badge">Lv.${s.stat_level||1}</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="stat-level-badge">Lv.${s.stat_level||1}</span>
+          <button class="stat-delete-btn" onclick="deleteStat('${s.id}','${esc(s.name)}')" title="Удалить навык">×</button>
+        </div>
       </div>
-      <div class="stat-meta">🔥 Стрик: ${s.stat_streak||0} · раз в ${s.frequency_days||1} дн.</div>
+      <div class="stat-meta">${t('streak_label', s.stat_streak||0)} · ${t('freq_label', s.frequency_days||1)}</div>
       <div class="xp-bar-wrap">
         <div class="xp-bar-fill" style="width:${(fill*100).toFixed(1)}%"></div>
       </div>
@@ -564,17 +826,24 @@ function renderStatCards() {
         до Lv.${(s.stat_level||1)+1}: ${xpNext} XP
       </div>
       <button class="btn-log" id="bl-${s.id}" onclick="openLogModal('${s.id}','${esc(s.name)}','${s.icon}')">
-        + Записать
+        ${t('write_btn')}
       </button>
     </div>`;
-  }).join('') || '<p class="text-muted" style="font-size:14px;">Нет статов.</p>';
+  }).join('');
+
+  if (!state.stats.length) {
+    grid.innerHTML = `<div style="text-align:center;padding:32px 0;">
+      <p class="text-muted" style="margin-bottom:16px;">Нет навыков. Добавь первый!</p>
+      <button class="btn btn-primary" onclick="openAddStatModal()">+ Добавить навык</button>
+    </div>`;
+  }
 }
 
 function renderActivities() {
   const el = document.getElementById('activity-list');
   if (!el) return;
   if (!state.activities.length) {
-    el.innerHTML = '<p class="text-muted" style="font-size:14px;padding:16px 0;">Активностей пока нет. Запиши первую!</p>';
+    el.innerHTML = `<p class="text-muted" style="font-size:14px;padding:16px 0;">${t('no_activities')}</p>`;
     return;
   }
   el.innerHTML = state.activities.slice(0, 10).map(a => `
@@ -620,6 +889,137 @@ function doLogout() {
   showAuth();
 }
 
+// ── Add Stat Modal (Task 6) ───────────────────────────────────────────────────
+
+let addStatCtx = { categoryName: null, name: '', icon: '', freq: 1 };
+
+function openAddStatModal() {
+  closeUserMenu();
+  if (state.stats.length >= 5) {
+    showToast('⚠️', t('max_stats'));
+    return;
+  }
+  addStatCtx = { categoryName: null, name: '', icon: '', freq: 1 };
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.id = 'add-stat-modal';
+  backdrop.addEventListener('click', e => { if (e.target === backdrop) closeAddStatModal(); });
+  document.body.appendChild(backdrop);
+  requestAnimationFrame(() => backdrop.classList.add('open'));
+  renderAddStatModal();
+}
+
+function renderAddStatModal() {
+  const backdrop = document.getElementById('add-stat-modal');
+  if (!backdrop) return;
+
+  const catChips = STAT_CATEGORIES.map(cat => {
+    const selected = addStatCtx.categoryName === cat.name;
+    return `<div class="stat-chip ${selected?'selected':''}" onclick="selectAddCategory('${esc(cat.name)}','${esc(cat.icon)}')">
+      <span>${cat.icon}</span><span>${esc(cat.name)}</span>
+    </div>`;
+  }).join('');
+
+  const cat = STAT_CATEGORIES.find(c => c.name === addStatCtx.categoryName);
+  const subBubbles = cat ? cat.subs.map(sub => `
+    <div class="sub-bubble ${addStatCtx.name === sub.name ? 'selected' : ''}"
+         onclick="selectAddSub('${esc(sub.name)}','${esc(sub.icon)}')">
+      <span>${sub.icon}</span><span>${esc(sub.name)}</span>
+    </div>`).join('') : '';
+
+  backdrop.innerHTML = `
+    <div class="modal">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h3>${t('new_stat')}</h3>
+        <button onclick="closeAddStatModal()" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      <p class="text-muted" style="font-size:13px;margin-bottom:12px;">${t('choose_dir')}</p>
+      <div class="stat-options" style="margin-bottom:${cat?'12px':'0'}">${catChips}</div>
+      ${cat ? `
+        <p class="text-muted" style="font-size:13px;margin-bottom:10px;">${t('what_you_do')}</p>
+        <div class="sub-bubbles open-inline">${subBubbles}</div>
+      ` : ''}
+      ${addStatCtx.name ? `
+        <div style="margin-top:16px;padding:12px;background:var(--surface-2);border-radius:10px;">
+          <div style="font-size:14px;font-weight:600;margin-bottom:10px;">${addStatCtx.icon} ${esc(addStatCtx.name)}</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;color:var(--text-muted);">${t('frequency')}</span>
+            <div class="freq-picker">
+              <button class="freq-btn" onclick="changeAddFreq(-1)" ${addStatCtx.freq<=1?'disabled':''}>−</button>
+              <div class="freq-num" id="add-freq-num">${addStatCtx.freq}</div>
+              <button class="freq-btn" onclick="changeAddFreq(1)" ${addStatCtx.freq>=30?'disabled':''}>+</button>
+              <span class="freq-label">${t('per_day_str', addStatCtx.freq)}</span>
+            </div>
+          </div>
+        </div>
+        <div id="add-stat-err" style="color:#ef4444;font-size:13px;margin-top:8px;display:none;"></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="submitAddStat()">${t('add_stat_btn')}</button>
+      ` : ''}
+    </div>`;
+}
+
+function selectAddCategory(catName, catIcon) {
+  addStatCtx.categoryName = catName;
+  addStatCtx.name = '';
+  addStatCtx.icon = catIcon;
+  renderAddStatModal();
+}
+
+function selectAddSub(subName, subIcon) {
+  addStatCtx.name = subName;
+  addStatCtx.icon = subIcon;
+  renderAddStatModal();
+}
+
+function changeAddFreq(delta) {
+  addStatCtx.freq = Math.max(1, Math.min(30, addStatCtx.freq + delta));
+  renderAddStatModal();
+}
+
+async function submitAddStat() {
+  const errEl = document.getElementById('add-stat-err');
+  if (errEl) errEl.style.display = 'none';
+
+  try {
+    const newStat = await api('POST', '/stats', {
+      name: addStatCtx.name,
+      icon: addStatCtx.icon,
+      frequency_days: addStatCtx.freq,
+    });
+    state.stats.push(newStat);
+    closeAddStatModal();
+    renderStatCards();
+    showToast('✨', t('stat_added', addStatCtx.name));
+  } catch (e) {
+    if (errEl) {
+      errEl.textContent = e.data?.error || 'Ошибка добавления';
+      errEl.style.display = 'block';
+    }
+  }
+}
+
+function closeAddStatModal() {
+  const el = document.getElementById('add-stat-modal');
+  if (!el) return;
+  el.classList.add('closing');
+  setTimeout(() => el.remove(), 150);
+}
+
+// ── Delete Stat ───────────────────────────────────────────────────────────────
+
+async function deleteStat(statId, statName) {
+  if (!confirm(t('del_confirm', statName))) return;
+  try {
+    await api('DELETE', '/stats/' + statId);
+    state.stats = state.stats.filter(s => s.id !== statId);
+    renderStatCards();
+    showToast('🗑️', t('stat_deleted', statName));
+  } catch (e) {
+    showToast('⚠️', e.data?.error || 'Не удалось удалить');
+  }
+}
+
 // ── Log Modal ─────────────────────────────────────────────────────────────────
 
 let logCtx = { statID: null, statName: '', statIcon: '' };
@@ -636,13 +1036,13 @@ function openLogModal(statID, statName, statIcon) {
         <button onclick="closeLogModal()" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;line-height:1;">✕</button>
       </div>
       <div class="form-group">
-        <label>Что сделал?</label>
-        <input class="input" id="log-desc" type="text" placeholder="Описание активности..." maxlength="280"
+        <label>${t('what_did_you_do')}</label>
+        <input class="input" id="log-desc" type="text" placeholder="${t('desc_placeholder')}" maxlength="280"
           oninput="updateLogBtn()">
       </div>
       <div id="log-err" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"></div>
       <button class="btn btn-primary" style="width:100%" id="log-btn" onclick="submitLog()" disabled>
-        Записать
+        ${t('write_btn')}
       </button>
     </div>`;
   backdrop.addEventListener('click', e => { if (e.target === backdrop) closeLogModal(); });
@@ -677,10 +1077,8 @@ async function submitLog() {
     const result = await api('POST', '/activities', { stat_id: logCtx.statID, description: desc });
     closeLogModal();
 
-    // Patch activity with stat info (server returns stat_name/stat_icon in the activity object)
     state.activities.unshift(result.activity);
 
-    // Patch stat in state
     const si = state.stats.findIndex(s => s.id === logCtx.statID);
     if (si >= 0) {
       state.stats[si].stat_xp     = result.stat_xp;
@@ -689,22 +1087,18 @@ async function submitLog() {
     }
     if (state.character) state.character.level = result.character_level;
 
-    // Particles → arc ring
     const originBtn = document.getElementById('bl-' + logCtx.statID);
     const arcRing   = document.getElementById('arc-ring');
     if (originBtn && arcRing) fireXPParticles(originBtn, result.xp_earned, arcRing);
 
-    // Stat card pulse
     const card = document.getElementById('sc-' + logCtx.statID);
     if (card) { card.classList.remove('xp-pulse'); void card.offsetWidth; card.classList.add('xp-pulse'); }
 
-    // Level up
     if (result.character_level_up) setTimeout(() => showLevelUp(result.character_level), 800);
-    if (result.stat_level_up) showToast('⬆️', `${logCtx.statName} вырос до Lv.${result.stat_level}!`);
+    if (result.stat_level_up) showToast('⬆️', t('stat_leveled', logCtx.statName, result.stat_level));
     (result.achievements_unlocked || []).forEach((a, i) =>
-      setTimeout(() => showToast(a.icon, `Достижение: ${a.title}`), i * 400));
+      setTimeout(() => showToast(a.icon, `${t('achievement')}: ${a.title}`), i * 400));
 
-    // Update arc
     const totalXP = state.stats.reduce((s, x) => s + (x.stat_xp || 0), 0);
     const level   = levelFromXP(totalXP);
     if (state.character) state.character.level = level;
@@ -717,7 +1111,6 @@ async function submitLog() {
     if (lbl) lbl.textContent = `${totalXP.toLocaleString()} XP · до Lv.${level+1}: ${xpNext.toLocaleString()} XP`;
 
     if (result.character_level_up) {
-      // Reset arc to 0 instantly, then animate to new fill
       setArcFill('main', 0);
       setTimeout(() => setArcFill('main', xpFillRatio(totalXP, level)), 50);
     } else {
@@ -729,10 +1122,113 @@ async function submitLog() {
 
   } catch (e) {
     btn.disabled = false;
-    btn.textContent = 'Записать';
-    errEl.textContent = e.data?.error || 'Ошибка. Попробуй снова.';
+    btn.textContent = t('write_btn');
+    const msg = e.status === 429
+      ? (e.data?.error || t('period_block'))
+      : (e.data?.error || t('err_try_again'));
+    errEl.textContent = msg;
     errEl.style.display = 'block';
   }
+}
+
+// ── XP Chart (Task 8) ─────────────────────────────────────────────────────────
+
+async function loadXPChart() {
+  const el = document.getElementById('xp-chart-section');
+  if (!el) return;
+  try {
+    const data = await api('GET', '/analytics/xp-history?days=30');
+    if (!data.data || !data.data.length) return;
+    el.innerHTML = renderXPChart(data.data);
+  } catch {}
+}
+
+function renderXPChart(days) {
+  const maxXP = Math.max(...days.map(d => d.xp), 1);
+  const bars = days.map(d => {
+    const h = Math.max(4, Math.round((d.xp / maxXP) * 80));
+    const day = d.day.slice(5); // MM-DD
+    return `<div class="chart-bar-wrap" title="${d.day}: ${d.xp} XP">
+      <div class="chart-bar" style="height:${h}px"></div>
+      <div class="chart-day">${day.replace('-', '/')}</div>
+    </div>`;
+  }).join('');
+
+  const totalXP = days.reduce((s, d) => s + d.xp, 0);
+  return `
+    <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+      <h3>${t('xp_30')}</h3>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span style="font-size:13px;color:var(--text-muted);">${totalXP.toLocaleString()} ${t('xp_total')}</span>
+        <button class="btn btn-ghost" style="padding:6px 12px;font-size:13px;" onclick="exportCSV()">${t('export_csv')}</button>
+      </div>
+    </div>
+    <div class="xp-chart">${bars}</div>`;
+}
+
+async function exportCSV() {
+  try {
+    const [history, activities] = await Promise.all([
+      api('GET', '/analytics/xp-history?days=365'),
+      api('GET', '/activities?limit=100'),
+    ]);
+
+    const rows = [['Дата', 'XP за день']];
+    (history.data || []).forEach(d => rows.push([d.day, d.xp]));
+    rows.push([]);
+    rows.push(['Дата', 'Навык', 'Описание', 'XP']);
+    (Array.isArray(activities) ? activities : []).forEach(a =>
+      rows.push([new Date(a.logged_at).toLocaleDateString('ru'), a.stat_name, a.description, a.xp_earned])
+    );
+
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'arkhe-export.csv';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  } catch { showToast('⚠️', 'Ошибка экспорта'); }
+}
+
+// ── Achievements (Task 7) ─────────────────────────────────────────────────────
+
+async function loadAchievements() {
+  const el = document.getElementById('achievements-section');
+  if (!el) return;
+  try {
+    const list = await api('GET', '/achievements');
+    el.innerHTML = renderAchievements(list);
+  } catch {}
+}
+
+function renderAchievements(list) {
+  if (!list || !list.length) return '';
+  const unlocked = list.filter(a => a.unlocked);
+  const locked   = list.filter(a => !a.unlocked);
+  const locale   = getLang() === 'ru' ? 'ru-RU' : 'en-US';
+
+  const card = a => `
+    <div class="achievement-card ${a.unlocked ? 'unlocked' : 'locked'}">
+      <div class="achievement-icon">${a.icon}</div>
+      <div class="achievement-info">
+        <div class="achievement-title">${esc(a.title)}</div>
+        <div class="achievement-desc">${esc(a.description)}</div>
+        ${a.unlocked && a.unlocked_at ? `<div class="achievement-date">${new Date(a.unlocked_at).toLocaleDateString(locale)}</div>` : ''}
+      </div>
+      ${a.unlocked ? '<div class="achievement-check">✓</div>' : '<div class="achievement-lock">🔒</div>'}
+    </div>`;
+
+  return `
+    <h3 style="margin-bottom:16px;">${t('achievements')} <span style="font-size:14px;color:var(--text-muted);font-weight:400;">${unlocked.length}/${list.length}</span></h3>
+    ${unlocked.length ? `<div class="achievements-grid">${unlocked.map(card).join('')}</div>` : ''}
+    ${locked.length ? `
+      <details style="margin-top:12px;">
+        <summary style="font-size:14px;color:var(--text-muted);cursor:pointer;padding:8px 0;">
+          ${t('locked')} (${locked.length})
+        </summary>
+        <div class="achievements-grid" style="margin-top:12px;">${locked.map(card).join('')}</div>
+      </details>` : ''}`;
 }
 
 // ── Utils ─────────────────────────────────────────────────────────────────────

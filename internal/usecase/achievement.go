@@ -66,6 +66,16 @@ func (u *AchievementUsecase) Check(ctx context.Context, characterID uuid.UUID, u
 		return nil
 	}
 
+	nightOwl, err := u.activities.HasActivityAtHour(ctx, characterID, 0, 5)
+	if err != nil {
+		slog.Error("achievement night owl check failed", "err", err)
+	}
+
+	earlyBird, err := u.activities.HasActivityAtHour(ctx, characterID, 4, 7)
+	if err != nil {
+		slog.Error("achievement early bird check failed", "err", err)
+	}
+
 	var unlocked []domain.Achievement
 	for _, a := range all {
 		already, err := u.achievements.IsUnlocked(ctx, userID, a.ID)
@@ -73,7 +83,7 @@ func (u *AchievementUsecase) Check(ctx context.Context, characterID uuid.UUID, u
 			continue
 		}
 
-		if u.qualifies(a.Code, char, streak, activityCount, bookwormCount) {
+		if u.qualifies(a.Code, char, streak, activityCount, bookwormCount, nightOwl, earlyBird) {
 			if err := u.achievements.Unlock(ctx, userID, a.ID); err != nil {
 				slog.Error("unlock achievement failed", "code", a.Code, "err", err)
 				continue
@@ -90,6 +100,7 @@ func (u *AchievementUsecase) qualifies(
 	char *domain.Character,
 	streak *domain.Streak,
 	activityCount, bookwormCount int,
+	nightOwl, earlyBird bool,
 ) bool {
 	switch code {
 	case "first_blood":
@@ -102,6 +113,22 @@ func (u *AchievementUsecase) qualifies(
 		return char.Level >= 10
 	case "bookworm":
 		return bookwormCount >= 20
+	case "streak_3":
+		return streak.Current >= 3
+	case "streak_14":
+		return streak.Current >= 14
+	case "streak_30":
+		return streak.Current >= 30
+	case "activities_10":
+		return activityCount >= 10
+	case "activities_50":
+		return activityCount >= 50
+	case "level_5":
+		return char.Level >= 5
+	case "night_owl":
+		return nightOwl
+	case "early_bird":
+		return earlyBird
 	}
 	return false
 }

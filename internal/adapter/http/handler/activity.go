@@ -49,6 +49,10 @@ func (h *ActivityHandler) Log(w http.ResponseWriter, r *http.Request) {
 		Description: req.Description,
 	})
 	if err != nil {
+		if err == domain.ErrTooSoon {
+			writeError(w, http.StatusTooManyRequests, "Уже записано в этом периоде. Возвращайся позже!")
+			return
+		}
 		writeError(w, domainErrStatus(err), "failed to log activity")
 		return
 	}

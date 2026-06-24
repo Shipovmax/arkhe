@@ -2,8 +2,10 @@ package postgres
 
 import (
 	"context"
+	"time"
 
 	"arkhe/internal/domain"
+	"arkhe/internal/port"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -35,6 +37,33 @@ func (r *AchievementRepo) ListAll(ctx context.Context) ([]domain.Achievement, er
 			return nil, err
 		}
 		list = append(list, a)
+	}
+	return list, rows.Err()
+}
+
+func (r *AchievementRepo) ListWithStatus(ctx context.Context, userID uuid.UUID) ([]port.AchievementStatus, error) {
+	rows, err := r.pool.Query(ctx,
+		`SELECT a.id, a.code, a.title, a.description, a.icon, ua.unlocked_at
+		 FROM achievements a
+		 LEFT JOIN user_achievements ua ON ua.achievement_id = a.id AND ua.user_id = $1
+		 ORDER BY ua.unlocked_at DESC NULLS LAST, a.title`,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []port.AchievementStatus
+	for rows.Next() {
+		var s port.AchievementStatus
+		var unlockedAt *time.Time
+		if err := rows.Scan(&s.ID, &s.Code, &s.Title, &s.Description, &s.Icon, &unlockedAt); err != nil {
+			return nil, err
+		}
+		s.Unlocked = unlockedAt != nil
+		s.UnlockedAt = unlockedAt
+		list = append(list, s)
 	}
 	return list, rows.Err()
 }

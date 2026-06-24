@@ -59,18 +59,35 @@ func (h *AnalyticsHandler) Summary(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AnalyticsHandler) XPHistory(w http.ResponseWriter, r *http.Request) {
+	userID := userIDFromCtx(r)
+
 	days := 30
 	if v := r.URL.Query().Get("days"); v != "" {
 		if n, err := strconv.Atoi(v); err == nil && n > 0 && n <= 365 {
 			days = n
 		}
 	}
-	_ = days
-	// Placeholder: returns empty for now — requires time-series query
+
+	char, err := h.characters.GetByUserID(r.Context(), userID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "character not found")
+		return
+	}
+
 	since := time.Now().UTC().AddDate(0, 0, -days)
+	data, err := h.activities.XPByDay(r.Context(), char.ID, since)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to load xp history")
+		return
+	}
+	if data == nil {
+		data = []port.XPDay{}
+	}
+
 	writeJSON(w, http.StatusOK, map[string]any{
-		"since": since,
-		"data":  []any{},
+		"since": since.Format("2006-01-02"),
+		"days":  days,
+		"data":  data,
 	})
 }
 

@@ -2,8 +2,10 @@ package postgres
 
 import (
 	"context"
+	"time"
 
 	"arkhe/internal/domain"
+	"arkhe/internal/port"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -74,4 +76,52 @@ func (r *ActivityRepo) CountByCharacterAndStatName(ctx context.Context, characte
 		characterID, statName,
 	).Scan(&count)
 	return count, err
+}
+
+func (r *ActivityRepo) HasRecentActivity(ctx context.Context, statID uuid.UUID, since time.Time) (bool, error) {
+	var exists bool
+	err := r.pool.QueryRow(ctx,
+		`SELECT EXISTS(SELECT 1 FROM activities WHERE stat_id=$1 AND logged_at >= $2)`,
+		statID, since,
+	).Scan(&exists)
+	return exists, err
+}
+
+func (r *ActivityRepo) XPByDay(ctx context.Context, characterID uuid.UUID, since time.Time) ([]port.XPDay, error) {
+	rows, err := r.pool.Query(ctx,
+		`SELECT TO_CHAR(logged_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') as day, SUM(xp_earned)::int
+		 FROM activities
+		 WHERE character_id=$1 AND logged_at >= $2
+		 GROUP BY day
+		 ORDER BY day ASC`,
+		characterID, since,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var days []port.XPDay
+	for rows.Next() {
+		var d port.XPDay
+		if err := rows.Scan(&d.Day, &d.XP); err != nil {
+			return nil, err
+		}
+		days = append(days, d)
+	}
+	return days, rows.Err()
+}
+
+func (r *ActivityRepo) HasActivityAtHour(ctx context.Context, characterID uuid.UUID, afterHour, beforeHour int) (bool, error) {
+	var exists bool
+	err := r.pool.QueryRow(ctx,
+		`SELECT EXISTS(
+			SELECT 1 FROM activities
+			WHERE character_id=$1
+			  AND EXTRACT(HOUR FROM logged_at AT TIME ZONE 'UTC') >= $2
+			  AND EXTRACT(HOUR FROM logged_at AT TIME ZONE 'UTC') < $3
+		)`,
+		characterID, afterHour, beforeHour,
+	).Scan(&exists)
+	return exists, err
 }
