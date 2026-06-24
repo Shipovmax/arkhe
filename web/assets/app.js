@@ -156,7 +156,9 @@ function toggleLang() {
 const THEME_KEY = 'arkhe_theme';
 
 function getTheme() {
-  return localStorage.getItem(THEME_KEY) || 'dark';
+  const stored = localStorage.getItem(THEME_KEY);
+  if (stored) return stored;
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 }
 
 function applyTheme(theme) {
@@ -934,8 +936,22 @@ function toggleUserMenu(e) {
   if (open) {
     const btn = document.getElementById('char-name-btn');
     const rect = btn.getBoundingClientRect();
-    menu.style.top  = (rect.bottom + 8) + 'px';
-    menu.style.left = rect.left + 'px';
+    const menuW = 200;
+    const menuH = 220;
+    // Horizontal: center under button, clamp to viewport
+    let left = rect.left + rect.width / 2 - menuW / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8));
+    menu.style.left = left + 'px';
+    menu.style.width = menuW + 'px';
+    // Vertical: open upward if not enough space below
+    const spaceBelow = window.innerHeight - rect.bottom - 8;
+    if (spaceBelow < menuH) {
+      menu.style.top    = 'auto';
+      menu.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+    } else {
+      menu.style.top    = (rect.bottom + 8) + 'px';
+      menu.style.bottom = 'auto';
+    }
     setTimeout(() => document.addEventListener('click', closeUserMenu, { once: true }), 0);
   }
 }
@@ -1348,58 +1364,69 @@ function startVortex() {
   }
 
   const ctx = canvas.getContext('2d');
-  let W, H;
+  let W, H, scrollY = 0;
 
-  function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
   resize();
   window.addEventListener('resize', resize);
+  window.addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive: true });
 
-  const rings = Array.from({ length: 7 }, (_, i) => ({
-    rx:    90 + i * 65,
-    ry:    34 + i * 26,
-    angle: (i * Math.PI) / 3.5,
-    speed: 0.00025 * (i % 2 === 0 ? 1 : -1) * (1 + i * 0.08),
-    alpha: 0.03 + i * 0.008,
-    dash:  i % 2 === 0,
+  const isLight = () => document.documentElement.classList.contains('light');
+
+  const rings = Array.from({ length: 9 }, (_, i) => ({
+    rx:    W * 0.18 + i * W * 0.12,
+    ry:    H * 0.07 + i * H * 0.055,
+    angle: (i * Math.PI) / 4,
+    speed: 0.0003 * (i % 2 === 0 ? 1 : -1) * (1.1 - i * 0.06),
+    alpha: 0.18 - i * 0.012,
+    lw:    1.5 - i * 0.1,
+    dash:  i % 3 === 0,
   }));
 
-  const particles = Array.from({ length: 55 }, () => {
+  const particles = Array.from({ length: 80 }, () => {
     const ri = Math.floor(Math.random() * rings.length);
-    return { ri, phase: Math.random() * Math.PI * 2, speed: 0.0015 + Math.random() * 0.0025, a: 0.08 + Math.random() * 0.25, r: 1 + Math.random() * 1.4 };
+    return { ri, phase: Math.random() * Math.PI * 2, speed: 0.001 + Math.random() * 0.003, a: 0.2 + Math.random() * 0.6, r: 1 + Math.random() * 2 };
   });
 
   function draw() {
-    ctx.clearRect(0, 0, W, H);
-    const cx = W / 2, cy = H * 0.42;
+    // Resize rings dynamically if window changed
+    rings.forEach((ring, i) => {
+      ring.rx = W * 0.18 + i * W * 0.12;
+      ring.ry = H * 0.07 + i * H * 0.055;
+    });
 
-    // ambient center glow
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 260);
-    g.addColorStop(0, 'rgba(37,99,235,0.07)');
-    g.addColorStop(0.5, 'rgba(29,78,216,0.03)');
-    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.clearRect(0, 0, W, H);
+    const cx = W / 2;
+    const cy = H * 0.38 + scrollY * 0.25;  // scroll parallax
+    const light = isLight();
+
+    // Center glow
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(W, H) * 0.55);
+    g.addColorStop(0,   light ? 'rgba(37,99,235,0.12)'  : 'rgba(37,99,235,0.18)');
+    g.addColorStop(0.4, light ? 'rgba(29,78,216,0.05)'  : 'rgba(29,78,216,0.08)');
+    g.addColorStop(1,   'rgba(0,0,0,0)');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
 
-    // rings
+    // Rings
     rings.forEach(ring => {
       ring.angle += ring.speed;
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(ring.angle);
-      if (ring.dash) ctx.setLineDash([6, 18]);
+      if (ring.dash) ctx.setLineDash([8, 24]);
       ctx.beginPath();
       ctx.ellipse(0, 0, ring.rx, ring.ry, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(96,165,250,${ring.alpha})`;
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = light
+        ? `rgba(37,99,235,${ring.alpha * 0.7})`
+        : `rgba(96,165,250,${ring.alpha})`;
+      ctx.lineWidth = Math.max(0.5, ring.lw);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.restore();
     });
 
-    // particles
+    // Particles
     particles.forEach(p => {
       p.phase += p.speed;
       const ring = rings[p.ri];
@@ -1407,7 +1434,9 @@ function startVortex() {
       const py = cy + Math.sin(p.phase + ring.angle) * ring.ry;
       ctx.beginPath();
       ctx.arc(px, py, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(147,197,253,${p.a})`;
+      ctx.fillStyle = light
+        ? `rgba(37,99,235,${p.a * 0.5})`
+        : `rgba(147,197,253,${p.a})`;
       ctx.fill();
     });
 

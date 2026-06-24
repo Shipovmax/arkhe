@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Arkhe — Прокачай себя</title>
   <link rel="stylesheet" href="/assets/style.css">
-  <script>if(localStorage.getItem('arkhe_theme')==='light')document.documentElement.classList.add('light');</script>
+  <script>
+    var _t=localStorage.getItem('arkhe_theme');
+    if((_t==='light')||(!_t&&window.matchMedia('(prefers-color-scheme:light)').matches))
+      document.documentElement.classList.add('light');
+  </script>
 </head>
 <body>
   <div id="app"></div>

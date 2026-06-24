@@ -337,10 +337,116 @@
     </footer>
   </div>
   <script>
-    // Apply saved theme
-    if (localStorage.getItem('arkhe_theme') === 'light') {
+    // Apply saved theme (system fallback)
+    var _t = localStorage.getItem('arkhe_theme');
+    if ((_t === 'light') || (!_t && window.matchMedia('(prefers-color-scheme:light)').matches))
       document.documentElement.classList.add('light');
-    }
+
+    // ── Space canvas: stars + scroll-triggered meteors ──────────────────────────
+    (function() {
+      const canvas = document.createElement('canvas');
+      canvas.id = 'space-canvas';
+      canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;';
+      document.body.insertBefore(canvas, document.body.firstChild);
+      const ctx = canvas.getContext('2d');
+      let W = canvas.width = window.innerWidth;
+      let H = canvas.height = window.innerHeight;
+      window.addEventListener('resize', () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; });
+
+      const isLight = () => document.documentElement.classList.contains('light');
+
+      // Static stars
+      const stars = Array.from({length: 200}, () => ({
+        x: Math.random() * W, y: Math.random() * H,
+        r: 0.4 + Math.random() * 1.8,
+        base: 0.08 + Math.random() * 0.55,
+        t: Math.random() * Math.PI * 2,
+        ts: 0.005 + Math.random() * 0.02,
+      }));
+
+      // Meteors pool
+      const meteors = [];
+      let lastScrollY = 0;
+      let pendingMeteors = 0;
+
+      window.addEventListener('scroll', () => {
+        const dy = Math.abs(window.scrollY - lastScrollY);
+        lastScrollY = window.scrollY;
+        if (dy > 3) pendingMeteors += Math.ceil(dy / 30);
+      }, { passive: true });
+
+      function spawnMeteor() {
+        meteors.push({
+          x: W * 0.15 + Math.random() * W * 1.1,
+          y: -30 - Math.random() * 60,
+          vx: -2.5 - Math.random() * 4,
+          vy: 5 + Math.random() * 9,
+          len: 70 + Math.random() * 160,
+          life: 1,
+          decay: 0.012 + Math.random() * 0.018,
+          w: 1 + Math.random() * 1.8,
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        const light = isLight();
+        const scrollRatio = Math.min(window.scrollY / Math.max(1, document.body.scrollHeight - H), 1);
+
+        // Draw stars (more visible as you scroll)
+        stars.forEach(s => {
+          s.t += s.ts;
+          const a = s.base * (0.4 + 0.6 * Math.sin(s.t)) * (0.15 + scrollRatio * 0.85);
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = light
+            ? `rgba(37,99,235,${a * 0.35})`
+            : `rgba(200,225,255,${a})`;
+          ctx.fill();
+        });
+
+        // Spawn queued meteors (max 2 per frame)
+        while (pendingMeteors > 0) {
+          spawnMeteor();
+          pendingMeteors--;
+          if (meteors.length > 20) { pendingMeteors = 0; break; }
+        }
+
+        // Draw & update meteors
+        for (let i = meteors.length - 1; i >= 0; i--) {
+          const m = meteors[i];
+          m.x += m.vx; m.y += m.vy;
+          m.life -= m.decay;
+          if (m.life <= 0 || m.y > H + 60 || m.x < -80) { meteors.splice(i, 1); continue; }
+
+          const tx = m.x - m.vx * (m.len / m.vy);
+          const ty = m.y - m.vy * (m.len / m.vy);
+          const grad = ctx.createLinearGradient(tx, ty, m.x, m.y);
+          if (light) {
+            grad.addColorStop(0, 'rgba(29,78,216,0)');
+            grad.addColorStop(1, `rgba(29,78,216,${m.life * 0.7})`);
+          } else {
+            grad.addColorStop(0, 'rgba(147,197,253,0)');
+            grad.addColorStop(0.6, `rgba(200,225,255,${m.life * 0.4})`);
+            grad.addColorStop(1, `rgba(255,255,255,${m.life})`);
+          }
+          ctx.beginPath();
+          ctx.moveTo(tx, ty); ctx.lineTo(m.x, m.y);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = m.w; ctx.lineCap = 'round'; ctx.stroke();
+
+          // Head glow
+          const hg = ctx.createRadialGradient(m.x, m.y, 0, m.x, m.y, m.w * 4);
+          hg.addColorStop(0, light ? `rgba(37,99,235,${m.life * 0.9})` : `rgba(220,240,255,${m.life})`);
+          hg.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = hg;
+          ctx.fillRect(m.x - m.w*4, m.y - m.w*4, m.w*8, m.w*8);
+        }
+
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
 
     // Hero background crossfade on scroll + mouse parallax
     (function() {
