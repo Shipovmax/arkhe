@@ -6,7 +6,7 @@ const LANG_KEY = 'arkhe_lang';
 
 const I18N = {
   ru: {
-    tagline:        'Стань персонажем своей видеоигры',
+    tagline:        'Прокачивай реальную жизнь как RPG.<br>Тренировки, чтение, работа — всё приносит XP.<br>Расти в уровнях. <strong>Не сдавайся.</strong>',
     login:          'Войти',
     register:       'Регистрация',
     email:          'Email',
@@ -52,10 +52,11 @@ const I18N = {
     max_stats:     'Максимум 5 навыков на Free плане',
     stat_added:    (name) => `Навык «${name}» добавлен!`,
     stat_deleted:  (name) => `«${name}» удалён`,
-    level_up:      'Level Up',
-    achievement:   'Достижение',
+    level_up:           'Level Up',
+    achievement:        'Достижение',
+    achievement_unlocked: 'Достижение разблокировано',
     stat_leveled:  (name, lv) => `${name} вырос до Lv.${lv}!`,
-    period_block:  'Уже записано в этом периоде. Возвращайся позже!',
+    period_block:  'Ты уже сделал это сегодня — отлично! Возвращайся в следующем периоде 💪',
     err_try_again: 'Ошибка. Попробуй снова.',
     per_day_str:   (n) => `раз в ${n} ${n===1?'день':n<5?'дня':'дней'}`,
     streak_label:  (n) => `🔥 Стрик: ${n}`,
@@ -64,7 +65,7 @@ const I18N = {
     xp_label:      (xp, lv, xpNext) => `${xp.toLocaleString()} XP · до Lv.${lv}: ${xpNext.toLocaleString()} XP`,
   },
   en: {
-    tagline:        'Become a character in your own video game',
+    tagline:        'Level up your real life like an RPG.<br>Workouts, reading, work — everything earns XP.<br>Rise in levels. <strong>Don\'t quit.</strong>',
     login:          'Log in',
     register:       'Sign up',
     email:          'Email',
@@ -110,10 +111,11 @@ const I18N = {
     max_stats:     'Maximum 5 skills on the Free plan',
     stat_added:    (name) => `Skill «${name}» added!`,
     stat_deleted:  (name) => `«${name}» deleted`,
-    level_up:      'Level Up',
-    achievement:   'Achievement',
+    level_up:           'Level Up',
+    achievement:        'Achievement',
+    achievement_unlocked: 'Achievement Unlocked',
     stat_leveled:  (name, lv) => `${name} reached Lv.${lv}!`,
-    period_block:  'Already logged this period. Come back later!',
+    period_block:  'You already crushed it today — nice! Come back next period 💪',
     err_try_again: 'Error. Please try again.',
     per_day_str:   (n) => `every ${n} ${n===1?'day':'days'}`,
     streak_label:  (n) => `🔥 Streak: ${n}`,
@@ -275,6 +277,24 @@ function showLevelUp(newLevel) {
   const dismiss = () => { overlay.style.opacity='0'; setTimeout(() => overlay.remove(), 300); };
   overlay.addEventListener('click', dismiss);
   setTimeout(dismiss, 2500);
+}
+
+// ── Achievement Overlay ───────────────────────────────────────────────────────
+
+function showAchievementOverlay(a, delay) {
+  setTimeout(() => {
+    const overlay = document.createElement('div');
+    overlay.className = 'levelup-overlay achievement-overlay';
+    overlay.innerHTML = `
+      <div class="achievement-overlay-icon">${a.icon}</div>
+      <div class="achievement-overlay-label">${t('achievement_unlocked')}</div>
+      <div class="achievement-overlay-title">${esc(a.title)}</div>
+      <div class="achievement-overlay-desc">${esc(a.description)}</div>`;
+    document.body.appendChild(overlay);
+    const dismiss = () => { overlay.style.opacity='0'; setTimeout(() => overlay.remove(), 300); };
+    overlay.addEventListener('click', dismiss);
+    setTimeout(dismiss, 3000);
+  }, delay);
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -757,6 +777,7 @@ function showDashboard() {
           <div class="char-name char-name-btn" id="char-name-btn" onclick="toggleUserMenu(event)" style="margin-top:16px;">
             ${esc(c.display_name)} <span style="font-size:14px;color:var(--text-muted);">▾</span>
           </div>
+          <div id="achievement-badges" class="achievement-badges"></div>
           <div class="streak-inline" id="streak-inline">🔥 <span id="streak-val">—</span> ${t('streak_days')}</div>
           <div class="char-xp-label" id="xp-label">
             ${t('xp_label', totalXP, level+1, xpNext)}
@@ -764,7 +785,7 @@ function showDashboard() {
         </div>
         <div class="user-menu" id="user-menu">
           <div class="user-menu-item" onclick="openAddStatModal()">
-            <span>＋</span><span>${t('add_stat')}</span>
+            <span>${t('add_stat')}</span>
           </div>
           <div class="user-menu-item" onclick="toggleLang();closeUserMenu()">
             <span>🌐</span><span>${getLang() === 'ru' ? 'English' : 'Русский'}</span>
@@ -782,24 +803,25 @@ function showDashboard() {
 
       <div class="stats-grid" id="stats-grid" style="animation:fadeIn 300ms ease 150ms both"></div>
 
-      <div class="activity-feed" style="animation:fadeIn 300ms ease 300ms both">
+      <div id="achievements-unlocked-section" style="animation:fadeIn 300ms ease 250ms both;"></div>
+
+      <div class="activity-feed" style="animation:fadeIn 300ms ease 350ms both">
         <h3 style="margin-bottom:16px;">${t('last_activities')}</h3>
         <div id="activity-list"></div>
+        <div id="activity-more"></div>
       </div>
 
-      <div id="xp-chart-section" style="animation:fadeIn 300ms ease 400ms both;margin-bottom:32px;"></div>
-
-      <div id="achievements-section" style="animation:fadeIn 300ms ease 500ms both;"></div>
+      <div id="achievements-locked-section" style="animation:fadeIn 300ms ease 450ms both;"></div>
     </div>`;
 
   requestAnimationFrame(() => {
     setTimeout(() => setArcFill('main', xpFillRatio(totalXP, level)), 200);
   });
 
+  activityPage = 1;
   renderStatCards();
   renderActivities();
   loadStreak();
-  loadXPChart();
   loadAchievements();
 }
 
@@ -839,14 +861,20 @@ function renderStatCards() {
   }
 }
 
+const ACTIVITY_PAGE = 3;
+let activityPage = 1;
+
 function renderActivities() {
   const el = document.getElementById('activity-list');
+  const moreEl = document.getElementById('activity-more');
   if (!el) return;
   if (!state.activities.length) {
     el.innerHTML = `<p class="text-muted" style="font-size:14px;padding:16px 0;">${t('no_activities')}</p>`;
+    if (moreEl) moreEl.innerHTML = '';
     return;
   }
-  el.innerHTML = state.activities.slice(0, 10).map(a => `
+  const visible = state.activities.slice(0, activityPage * ACTIVITY_PAGE);
+  el.innerHTML = visible.map(a => `
     <div class="activity-item">
       <div class="activity-icon">${a.stat_icon||'⚡'}</div>
       <div style="flex:1">
@@ -855,6 +883,18 @@ function renderActivities() {
       </div>
       <div class="activity-xp">+${a.xp_earned} XP</div>
     </div>`).join('');
+  if (moreEl) {
+    if (visible.length < state.activities.length) {
+      moreEl.innerHTML = `<button class="btn btn-ghost" style="width:100%;margin-top:12px;font-size:14px;" onclick="loadMoreActivities()">${getLang()==='ru'?'Показать ещё':'Show more'}</button>`;
+    } else {
+      moreEl.innerHTML = '';
+    }
+  }
+}
+
+function loadMoreActivities() {
+  activityPage++;
+  renderActivities();
 }
 
 async function loadStreak() {
@@ -1008,16 +1048,40 @@ function closeAddStatModal() {
 
 // ── Delete Stat ───────────────────────────────────────────────────────────────
 
+function showConfirm(title, message, onOk) {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.id = 'confirm-modal';
+  backdrop.innerHTML = `
+    <div class="modal confirm-dialog">
+      <div class="confirm-title">${title}</div>
+      <p>${message}</p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" onclick="document.getElementById('confirm-modal').remove()">${getLang()==='ru'?'Отмена':'Cancel'}</button>
+        <button class="btn btn-primary" id="confirm-ok-btn">${getLang()==='ru'?'Удалить':'Delete'}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(backdrop);
+  requestAnimationFrame(() => backdrop.classList.add('open'));
+  backdrop.addEventListener('click', e => { if (e.target === backdrop) backdrop.remove(); });
+  document.getElementById('confirm-ok-btn').onclick = () => { backdrop.remove(); onOk(); };
+}
+
 async function deleteStat(statId, statName) {
-  if (!confirm(t('del_confirm', statName))) return;
-  try {
-    await api('DELETE', '/stats/' + statId);
-    state.stats = state.stats.filter(s => s.id !== statId);
-    renderStatCards();
-    showToast('🗑️', t('stat_deleted', statName));
-  } catch (e) {
-    showToast('⚠️', e.data?.error || 'Не удалось удалить');
-  }
+  showConfirm(
+    getLang()==='ru' ? 'Удалить навык?' : 'Delete skill?',
+    t('del_confirm', statName),
+    async () => {
+      try {
+        await api('DELETE', '/stats/' + statId);
+        state.stats = state.stats.filter(s => s.id !== statId);
+        renderStatCards();
+        showToast('🗑️', t('stat_deleted', statName));
+      } catch (e) {
+        showToast('⚠️', e.data?.error || 'Не удалось удалить');
+      }
+    }
+  );
 }
 
 // ── Log Modal ─────────────────────────────────────────────────────────────────
@@ -1077,6 +1141,7 @@ async function submitLog() {
     const result = await api('POST', '/activities', { stat_id: logCtx.statID, description: desc });
     closeLogModal();
 
+    activityPage = 1;
     state.activities.unshift(result.activity);
 
     const si = state.stats.findIndex(s => s.id === logCtx.statID);
@@ -1096,8 +1161,8 @@ async function submitLog() {
 
     if (result.character_level_up) setTimeout(() => showLevelUp(result.character_level), 800);
     if (result.stat_level_up) showToast('⬆️', t('stat_leveled', logCtx.statName, result.stat_level));
-    (result.achievements_unlocked || []).forEach((a, i) =>
-      setTimeout(() => showToast(a.icon, `${t('achievement')}: ${a.title}`), i * 400));
+    (result.achievements_unlocked || []).forEach((a, i) => showAchievementOverlay(a, 600 + i * 3200));
+    if ((result.achievements_unlocked || []).length > 0) setTimeout(loadAchievements, 200);
 
     const totalXP = state.stats.reduce((s, x) => s + (x.stat_xp || 0), 0);
     const level   = levelFromXP(totalXP);
@@ -1194,41 +1259,51 @@ async function exportCSV() {
 // ── Achievements (Task 7) ─────────────────────────────────────────────────────
 
 async function loadAchievements() {
-  const el = document.getElementById('achievements-section');
-  if (!el) return;
+  const unlockedEl = document.getElementById('achievements-unlocked-section');
+  const lockedEl   = document.getElementById('achievements-locked-section');
+  if (!unlockedEl && !lockedEl) return;
   try {
     const list = await api('GET', '/achievements');
-    el.innerHTML = renderAchievements(list);
+    const unlocked = (list || []).filter(a => a.unlocked);
+    const locked   = (list || []).filter(a => !a.unlocked);
+    const locale   = getLang() === 'ru' ? 'ru-RU' : 'en-US';
+
+    const card = a => `
+      <div class="achievement-card ${a.unlocked ? 'unlocked' : 'locked'}">
+        <div class="achievement-icon">${a.icon}</div>
+        <div class="achievement-info">
+          <div class="achievement-title">${esc(a.title)}</div>
+          <div class="achievement-desc">${esc(a.description)}</div>
+          ${a.unlocked && a.unlocked_at ? `<div class="achievement-date">${new Date(a.unlocked_at).toLocaleDateString(locale)}</div>` : ''}
+        </div>
+        ${a.unlocked ? '<div class="achievement-check">✓</div>' : '<div class="achievement-lock">🔒</div>'}
+      </div>`;
+
+    if (unlockedEl) {
+      unlockedEl.innerHTML = unlocked.length ? `
+        <div style="margin-bottom:32px;">
+          <h3 style="margin-bottom:16px;">${t('achievements')} <span style="font-size:14px;color:var(--text-muted);font-weight:400;">${unlocked.length}/${list.length}</span></h3>
+          <div class="achievements-grid">${unlocked.map(card).join('')}</div>
+        </div>` : '';
+    }
+
+    if (lockedEl) {
+      lockedEl.innerHTML = locked.length ? `
+        <details style="margin-top:8px;">
+          <summary style="font-size:14px;color:var(--text-muted);cursor:none;padding:8px 0;list-style:none;display:flex;align-items:center;gap:6px;">
+            <span style="font-size:12px;">▸</span>${t('locked')} (${locked.length})
+          </summary>
+          <div class="achievements-grid" style="margin-top:12px;">${locked.map(card).join('')}</div>
+        </details>` : '';
+    }
+
+    const badgesEl = document.getElementById('achievement-badges');
+    if (badgesEl && unlocked.length > 0) {
+      badgesEl.innerHTML = unlocked.slice(0, 8).map(a =>
+        `<span class="achievement-badge" title="${esc(a.title)}">${a.icon}</span>`
+      ).join('');
+    }
   } catch {}
-}
-
-function renderAchievements(list) {
-  if (!list || !list.length) return '';
-  const unlocked = list.filter(a => a.unlocked);
-  const locked   = list.filter(a => !a.unlocked);
-  const locale   = getLang() === 'ru' ? 'ru-RU' : 'en-US';
-
-  const card = a => `
-    <div class="achievement-card ${a.unlocked ? 'unlocked' : 'locked'}">
-      <div class="achievement-icon">${a.icon}</div>
-      <div class="achievement-info">
-        <div class="achievement-title">${esc(a.title)}</div>
-        <div class="achievement-desc">${esc(a.description)}</div>
-        ${a.unlocked && a.unlocked_at ? `<div class="achievement-date">${new Date(a.unlocked_at).toLocaleDateString(locale)}</div>` : ''}
-      </div>
-      ${a.unlocked ? '<div class="achievement-check">✓</div>' : '<div class="achievement-lock">🔒</div>'}
-    </div>`;
-
-  return `
-    <h3 style="margin-bottom:16px;">${t('achievements')} <span style="font-size:14px;color:var(--text-muted);font-weight:400;">${unlocked.length}/${list.length}</span></h3>
-    ${unlocked.length ? `<div class="achievements-grid">${unlocked.map(card).join('')}</div>` : ''}
-    ${locked.length ? `
-      <details style="margin-top:12px;">
-        <summary style="font-size:14px;color:var(--text-muted);cursor:pointer;padding:8px 0;">
-          ${t('locked')} (${locked.length})
-        </summary>
-        <div class="achievements-grid" style="margin-top:12px;">${locked.map(card).join('')}</div>
-      </details>` : ''}`;
 }
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
@@ -1237,6 +1312,45 @@ function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── Custom Cursor ─────────────────────────────────────────────────────────────
+
+function initCursor() {
+  if (window.matchMedia('(pointer: coarse)').matches) return; // skip on touch
+  const dot  = document.createElement('div'); dot.className  = 'cursor-dot';
+  const ring = document.createElement('div'); ring.className = 'cursor-ring';
+  document.body.appendChild(dot);
+  document.body.appendChild(ring);
+
+  let mx = -100, my = -100, rx = -100, ry = -100;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  document.addEventListener('mousedown', () => dot.classList.add('cursor-click'));
+  document.addEventListener('mouseup',   () => dot.classList.remove('cursor-click'));
+
+  const interactiveSelector = 'a,button,[onclick],label,summary,.stat-chip,.sub-bubble,.class-card,.btn-log,.user-menu-item';
+  document.addEventListener('mouseover', e => {
+    if (e.target.closest(interactiveSelector)) {
+      dot.classList.add('cursor-hover'); ring.classList.add('cursor-hover');
+    }
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest(interactiveSelector)) {
+      dot.classList.remove('cursor-hover'); ring.classList.remove('cursor-hover');
+    }
+  });
+
+  let rafId;
+  function loop() {
+    dot.style.left  = mx + 'px';
+    dot.style.top   = my + 'px';
+    rx += (mx - rx) * 0.14;
+    ry += (my - ry) * 0.14;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    rafId = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => { init(); initCursor(); });

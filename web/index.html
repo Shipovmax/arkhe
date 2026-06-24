@@ -9,6 +9,7 @@
   <meta property="og:description" content="Arkhe превращает привычки в игру. И игры не бросают.">
   <meta property="og:image" content="/assets/og.png">
   <link rel="stylesheet" href="/assets/style.css">
+  <style>body { cursor: none; } a, button, [onclick] { cursor: none; }</style>
   <style>
     /* ── Landing-only overrides ── */
     .hero-punch {
@@ -125,6 +126,8 @@
   </style>
 </head>
 <body>
+  <div class="cursor-dot" id="cursor-dot"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
   <div class="container">
     <nav class="landing-nav">
       <div class="logo">Arkhe</div>
@@ -148,13 +151,11 @@
         <span class="hit">забросил.</span>
       </h1>
       <p class="hero-sub">
-        Всё начинается с энтузиазма и умирает через две недели.<br>
-        <strong>Arkhe превращает привычки в игру. И игры не бросают.</strong>
+        <strong>Arkhe превращает привычки в игру.<br>И игры не бросают.</strong>
       </p>
       <a href="/app.html" class="btn btn-primary" style="font-size:18px;padding:16px 40px;">
         Хватит. Попробовать →
       </a>
-      <p style="font-size:13px;color:var(--text-muted);margin-top:12px;">Бесплатно. Без карты.</p>
     </section>
 
     <!-- How it works -->
@@ -257,5 +258,22 @@
       </div>
     </footer>
   </div>
+  <script>
+    if (!window.matchMedia('(pointer: coarse)').matches) {
+      const dot = document.getElementById('cursor-dot');
+      const ring = document.getElementById('cursor-ring');
+      let mx=-100,my=-100,rx=-100,ry=-100;
+      document.addEventListener('mousemove', e=>{mx=e.clientX;my=e.clientY;});
+      document.addEventListener('mousedown', ()=>dot.classList.add('cursor-click'));
+      document.addEventListener('mouseup', ()=>dot.classList.remove('cursor-click'));
+      document.addEventListener('mouseover', e=>{
+        if(e.target.closest('a,button,[onclick]')){dot.classList.add('cursor-hover');ring.classList.add('cursor-hover');}
+      });
+      document.addEventListener('mouseout', e=>{
+        if(e.target.closest('a,button,[onclick]')){dot.classList.remove('cursor-hover');ring.classList.remove('cursor-hover');}
+      });
+      (function loop(){dot.style.left=mx+'px';dot.style.top=my+'px';rx+=(mx-rx)*0.14;ry+=(my-ry)*0.14;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+    }
+  </script>
 </body>
 </html>

@@ -21,6 +21,45 @@ body {
   color: var(--text);
   line-height: 1.5;
   min-height: 100vh;
+  cursor: none;
+}
+a, button, [onclick], label, summary, input, textarea, select { cursor: none; }
+
+/* ── Custom cursor ── */
+.cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 12px; height: 12px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: transform 60ms linear, width 200ms ease, height 200ms ease, background 200ms ease;
+  will-change: transform;
+}
+.cursor-dot.cursor-hover {
+  width: 22px; height: 22px;
+  background: rgba(168,85,247,0.6);
+}
+.cursor-dot.cursor-click {
+  transform: translate(-50%,-50%) scale(0.6);
+}
+.cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: transform 180ms ease, width 200ms ease, height 200ms ease, border-color 200ms ease, opacity 200ms ease;
+  will-change: transform;
+}
+.cursor-ring.cursor-hover {
+  width: 48px; height: 48px;
+  border-color: rgba(168,85,247,0.4);
 }
 
 h1, h2, h3 { letter-spacing: -0.02em; line-height: 1.2; }
@@ -55,9 +94,10 @@ h3 { font-size: 24px; font-weight: 600; }
   font-family: inherit;
   transition: transform 200ms cubic-bezier(0.34,1.56,0.64,1), box-shadow 200ms ease, opacity 200ms ease;
 }
-.btn:active { transform: scale(0.94); transition: transform 80ms ease; }
+.btn:hover { transform: scale(1.04) translateY(-1px); }
+.btn:active { transform: scale(0.93); transition: transform 80ms ease; }
 .btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover { box-shadow: 0 0 20px rgba(124,58,237,0.4); }
+.btn-primary:hover { box-shadow: 0 0 28px rgba(124,58,237,0.5), 0 4px 12px rgba(0,0,0,0.4); }
 .btn-ghost {
   background: transparent;
   color: var(--text-muted);
@@ -170,8 +210,8 @@ h3 { font-size: 24px; font-weight: 600; }
   margin-top: 12px;
   transition: transform 200ms cubic-bezier(0.34,1.56,0.64,1), box-shadow 200ms ease;
 }
-.btn-log:active { transform: scale(0.94); transition: transform 80ms ease; }
-.btn-log:hover  { box-shadow: 0 0 12px rgba(124,58,237,0.4); }
+.btn-log:hover  { box-shadow: 0 0 20px rgba(124,58,237,0.5); transform: scale(1.03) translateY(-1px); }
+.btn-log:active { transform: scale(0.93); transition: transform 80ms ease; }
 
 /* ── Modal ── */
 .modal-backdrop {
@@ -179,27 +219,39 @@ h3 { font-size: 24px; font-weight: 600; }
   inset: 0;
   background: rgba(13,13,18,0.85);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   z-index: 100;
   opacity: 0;
   transition: opacity 280ms ease-out;
   pointer-events: none;
+  padding: 16px;
 }
 .modal-backdrop.open { opacity: 1; pointer-events: all; }
 .modal {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius) var(--radius) 0 0;
+  border-radius: var(--radius);
   padding: 32px;
   width: 100%;
   max-width: 540px;
-  transform: translateY(40px);
-  transition: transform 280ms ease-out;
+  transform: scale(0.95) translateY(8px);
+  transition: transform 280ms cubic-bezier(0.34,1.56,0.64,1), opacity 280ms ease;
+  opacity: 0;
 }
-.modal-backdrop.open .modal { transform: translateY(0); }
+.modal-backdrop.open .modal { transform: scale(1) translateY(0); opacity: 1; }
 .modal-backdrop.closing { opacity: 0; transition: opacity 150ms ease; }
-.modal-backdrop.closing .modal { transform: translateY(40px); transition: transform 150ms ease; }
+.modal-backdrop.closing .modal { transform: scale(0.95) translateY(8px); transition: transform 150ms ease, opacity 150ms ease; opacity: 0; }
+
+/* ── Confirm dialog ── */
+.confirm-dialog {
+  max-width: 380px;
+  text-align: center;
+}
+.confirm-dialog p { color: var(--text-muted); font-size: 14px; margin: 12px 0 24px; line-height: 1.6; }
+.confirm-dialog .confirm-title { font-size: 18px; font-weight: 600; color: var(--text); }
+.confirm-dialog .confirm-actions { display: flex; gap: 10px; }
+.confirm-dialog .confirm-actions .btn { flex: 1; }
 
 /* ── Forms ── */
 .input {
@@ -812,6 +864,59 @@ footer a:hover { color: var(--text); }
 .achievement-check { color: var(--accent-glow); font-size: 16px; font-weight: 700; flex-shrink: 0; }
 .achievement-lock { font-size: 14px; flex-shrink: 0; }
 
+/* ── Achievement Overlay ── */
+.achievement-overlay .achievement-overlay-icon {
+  font-size: 72px;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(0.4);
+  animation: levelNumIn 500ms cubic-bezier(0.34,1.56,0.64,1) 100ms forwards;
+}
+.achievement-overlay .achievement-overlay-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent-glow);
+  margin-top: 20px;
+  opacity: 0;
+  animation: fadeIn 300ms ease 500ms forwards;
+}
+.achievement-overlay .achievement-overlay-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 8px;
+  opacity: 0;
+  animation: fadeIn 300ms ease 650ms forwards;
+}
+.achievement-overlay .achievement-overlay-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  max-width: 300px;
+  text-align: center;
+  opacity: 0;
+  animation: fadeIn 300ms ease 800ms forwards;
+}
+
+/* ── Achievement Badges ── */
+.achievement-badges {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 8px 0 4px;
+  min-height: 28px;
+}
+.achievement-badge {
+  font-size: 20px;
+  cursor: default;
+  transition: transform 200ms ease;
+  display: inline-block;
+}
+.achievement-badge:hover { transform: scale(1.3); }
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   h1 { font-size: 28px; }
@@ -861,13 +966,8 @@ footer a:hover { color: var(--text); }
   .stat-card { padding: 16px; }
   .btn-log { padding: 10px 16px; min-height: 44px; }
 
-  /* Modal — full bottom sheet on mobile */
-  .modal {
-    max-width: 100%;
-    border-radius: var(--radius) var(--radius) 0 0;
-    padding: 24px 20px 32px;
-  }
-  .modal-backdrop { align-items: flex-end; }
+  /* Modal — centered on mobile too */
+  .modal { padding: 24px 20px 28px; }
 
   /* Toast — centered at bottom on mobile */
   .toast-container {
