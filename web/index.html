@@ -3,12 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arkhe — Превратите жизнь в RPG</title>
-  <meta name="description" content="Arkhe — геймификация реальной жизни. Логируй активности, прокачивай статы, расти каждый день.">
-  <meta property="og:title" content="Arkhe — Превратите жизнь в RPG">
-  <meta property="og:description" content="Логируй активности, зарабатывай XP, прокачивай персонажа.">
+  <title>Arkhe — Ты снова забросил?</title>
+  <meta name="description" content="Тренировки. Язык. Чтение. Всё начинается и умирает через 2 недели. Arkhe превращает привычки в игру — и игры не бросают.">
+  <meta property="og:title" content="Ты снова забросил?">
+  <meta property="og:description" content="Arkhe превращает привычки в игру. И игры не бросают.">
   <meta property="og:image" content="/assets/og.png">
   <link rel="stylesheet" href="/assets/style.css">
+  <style>
+    /* ── Landing-only overrides ── */
+    .hero-punch {
+      font-size: clamp(40px, 8vw, 80px);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin-bottom: 24px;
+    }
+    .hero-punch .dim { color: var(--text-muted); }
+    .hero-punch .hit { color: var(--text); }
+
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+    .hero-sub strong { color: var(--text); font-weight: 600; }
+
+    .pain-list {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .pain-tag {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      color: #fca5a5;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      animation: fadeIn 400ms ease both;
+    }
+
+    .hero-divider {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 32px auto;
+      border-radius: 999px;
+    }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2px;
+      background: var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 48px 0;
+    }
+    .how-step {
+      background: var(--surface);
+      padding: 28px 24px;
+    }
+    .how-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--accent-glow);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .how-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .how-desc  { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    .social-proof {
+      text-align: center;
+      padding: 48px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin: 48px 0;
+    }
+    .social-proof-num {
+      font-size: 48px;
+      font-weight: 600;
+      color: var(--accent-glow);
+      letter-spacing: -0.02em;
+    }
+    .social-proof-label {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .proof-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .cta-section {
+      text-align: center;
+      padding: 80px 0 48px;
+    }
+    .cta-section h2 {
+      font-size: clamp(28px, 5vw, 48px);
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    @media (max-width: 640px) {
+      .hero-punch { font-size: 36px; }
+      .how-grid { grid-template-columns: 1fr; }
+      .proof-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .social-proof-num { font-size: 32px; }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -16,97 +130,130 @@
       <div class="logo">Arkhe</div>
       <div style="display:flex;gap:12px;">
         <a href="/app.html" class="btn btn-ghost" style="padding:8px 20px;font-size:14px;">Войти</a>
-        <a href="/app.html" class="btn btn-primary" style="padding:8px 20px;font-size:14px;">Начать бесплатно</a>
+        <a href="/app.html" class="btn btn-primary" style="padding:8px 20px;font-size:14px;">Попробовать</a>
       </div>
     </nav>
 
     <!-- Hero -->
-    <section class="hero">
-      <h1>Стань персонажем<br>своей <span class="text-accent">видеоигры</span></h1>
-      <p>Прокачивай реальную жизнь как RPG. Тренировки, чтение, работа — всё приносит XP. Расти в уровнях. Не сдавайся.</p>
-      <a href="/app.html" class="btn btn-primary" style="font-size:20px;padding:16px 40px;">Начать прокачку →</a>
+    <section class="hero" style="padding:72px 0 56px;">
+      <div class="pain-list">
+        <span class="pain-tag">тренировки</span>
+        <span class="pain-tag" style="animation-delay:80ms">чтение</span>
+        <span class="pain-tag" style="animation-delay:160ms">язык</span>
+        <span class="pain-tag" style="animation-delay:240ms">медитация</span>
+        <span class="pain-tag" style="animation-delay:320ms">подъём в 7</span>
+      </div>
+      <h1 class="hero-punch">
+        <span class="dim">Ты снова</span><br>
+        <span class="hit">забросил.</span>
+      </h1>
+      <p class="hero-sub">
+        Всё начинается с энтузиазма и умирает через две недели.<br>
+        <strong>Arkhe превращает привычки в игру. И игры не бросают.</strong>
+      </p>
+      <a href="/app.html" class="btn btn-primary" style="font-size:18px;padding:16px 40px;">
+        Хватит. Попробовать →
+      </a>
+      <p style="font-size:13px;color:var(--text-muted);margin-top:12px;">Бесплатно. Без карты.</p>
     </section>
+
+    <!-- How it works -->
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <div class="how-title">Выбираешь что качать</div>
+        <div class="how-desc">Зал, книги, язык, подъём — любая привычка становится навыком со своим уровнем и прогрессом.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <div class="how-title">Логируешь — растёшь</div>
+        <div class="how-desc">Записал что сделал — получил XP. Каждый день в серии удваивает награду. Пропустил — стрик сгорает.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <div class="how-title">Видишь что изменилось</div>
+        <div class="how-desc">График роста, достижения, уровни. Через 30 дней ты видишь человека который стал лучше. Это ты.</div>
+      </div>
+    </div>
+
+    <!-- Social proof -->
+    <div class="social-proof">
+      <div class="proof-grid">
+        <div>
+          <div class="social-proof-num">×2.0</div>
+          <div class="social-proof-label">XP при стрике 14+ дней</div>
+        </div>
+        <div>
+          <div class="social-proof-num">13</div>
+          <div class="social-proof-label">достижений за реальные результаты</div>
+        </div>
+        <div>
+          <div class="social-proof-num">0 ₽</div>
+          <div class="social-proof-label">чтобы начать прямо сейчас</div>
+        </div>
+      </div>
+    </div>
 
     <!-- Features -->
     <section>
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">⚔️</div>
-          <h3 style="margin-bottom:8px;">XP прогрессия</h3>
-          <p class="text-muted">Каждая активность приносит опыт. Стрики дают множители. Прокачивай каждый стат отдельно.</p>
-        </div>
-        <div class="feature-card">
           <div class="feature-icon">🔥</div>
-          <h3 style="margin-bottom:8px;">Streaks</h3>
-          <p class="text-muted">Настрой частоту для каждого стата. Держи стрик — получай бонусные множители к XP.</p>
+          <h3 style="margin-bottom:8px;">Стрик который жалко сломать</h3>
+          <p class="text-muted">Пропустил день — стрик горит. Чем дольше серия, тем больше XP. Это работает лучше любой силы воли.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">✨</div>
-          <h3 style="margin-bottom:8px;">Достижения</h3>
-          <p class="text-muted">Разблокируй ачивки за реальные результаты. First Blood, On Fire, Centurion — собери все.</p>
+          <div class="feature-icon">📈</div>
+          <h3 style="margin-bottom:8px;">Прогресс который виден</h3>
+          <p class="text-muted">Уровни, XP-бар, график за 30 дней. Когда видишь рост — хочется продолжать. Банально, но работает.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3 style="margin-bottom:8px;">Твой темп, не чужой</h3>
+          <p class="text-muted">Зал 3 раза в неделю, медитация каждый день, книга раз в 3 дня. Ты сам задаёшь частоту для каждой привычки.</p>
         </div>
       </div>
     </section>
 
-    <!-- Pricing -->
-    <section style="padding:48px 0;">
-      <h2 style="text-align:center;margin-bottom:40px;">Тарифы</h2>
-      <div class="pricing-grid">
-        <div class="pricing-card card">
-          <h3 style="margin-bottom:8px;">Free</h3>
-          <div style="font-size:32px;font-weight:600;margin-bottom:16px;">0 ₽</div>
-          <ul style="list-style:none;color:var(--text-muted);font-size:14px;line-height:2;">
-            <li>✓ До 5 статов</li>
-            <li>✓ Неограниченные активности</li>
-            <li>✓ Streak система</li>
-            <li>✓ Все достижения</li>
-          </ul>
-          <a href="/app.html" class="btn btn-ghost" style="width:100%;margin-top:24px;">Начать</a>
-        </div>
-        <div class="pricing-card card featured">
-          <h3 style="margin-bottom:8px;">Pro <span style="font-size:12px;color:var(--accent-glow);">Скоро</span></h3>
-          <div style="font-size:32px;font-weight:600;margin-bottom:16px;">—</div>
-          <ul style="list-style:none;color:var(--text-muted);font-size:14px;line-height:2;">
-            <li>✓ Всё из Free</li>
-            <li>✓ Неограниченные статы</li>
-            <li>✓ Аналитика и графики</li>
-            <li>✓ Экспорт данных</li>
-          </ul>
-          <button class="btn btn-primary" style="width:100%;margin-top:24px;opacity:0.5;" disabled>Скоро</button>
-        </div>
-      </div>
+    <!-- CTA -->
+    <section class="cta-section">
+      <h2>Через 30 дней<br><span class="text-accent">ты будешь другим.</span></h2>
+      <p class="hero-sub" style="margin-bottom:32px;">Или нет. Но хотя бы попробуй.</p>
+      <a href="/app.html" class="btn btn-primary" style="font-size:18px;padding:16px 40px;">
+        Начать прямо сейчас →
+      </a>
     </section>
 
     <!-- FAQ -->
     <section class="faq">
       <h2 style="text-align:center;margin-bottom:32px;">Вопросы</h2>
       <div class="faq-item">
-        <div class="faq-q">Как считается XP?</div>
-        <div class="faq-a">Базово 100 XP за активность. Множитель растёт со стриком: ×1.25 от 3 стрика, ×1.5 от 7, ×2.0 от 14. Плюс ×1.1 если залогировал в первой половине периода. Формула: <code>XP = 100 × streak_mult × freq_bonus</code>.</div>
+        <div class="faq-q">Это очередной трекер привычек?</div>
+        <div class="faq-a">Нет. В трекерах привычек ты просто ставишь галочки. Здесь у тебя персонаж с уровнями, навыки с прогрессом, стрики которые жалко терять и достижения за реальные результаты. Психология другая — это работает по-другому.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">Что такое стрик стата?</div>
-        <div class="faq-a">Ты сам настраиваешь частоту для каждого стата (раз в день, раз в 2 дня, раз в неделю). Если не залогировал за период — стрик сбрасывается, приходит уведомление.</div>
+        <div class="faq-q">Нужно заполнять много всего?</div>
+        <div class="faq-a">Регистрация занимает 2 минуты. Выбрал что качаешь, дал имя персонажу — всё. Каждая запись активности — одна строчка текста.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">Как считается уровень персонажа?</div>
-        <div class="faq-a">Уровень персонажа зависит от суммарного XP по всем статам. Пороги: Lv.2 — 300 XP (~3 записи), Lv.3 — 800 XP (~5 больше), Lv.4 — 1 600 XP (~8 больше), Lv.5 — 2 800 XP (~12 больше). Каждый следующий уровень требует всё больше усилий.</div>
+        <div class="faq-q">Что если я пропущу день?</div>
+        <div class="faq-a">Стрик сгорит. Это больно. Именно поэтому работает. Ты сам настраиваешь частоту — можно поставить «раз в 3 дня» если каждый день нереально.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">Сколько статов можно создать?</div>
-        <div class="faq-a">На Free плане до 5 статов. Этого достаточно для старта — сфокусируйся на главном.</div>
+        <div class="faq-q">Сколько стоит?</div>
+        <div class="faq-a">Базовая версия бесплатна навсегда. До 5 навыков, неограниченные записи, все достижения. Pro с расширенной аналитикой — скоро.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">Данные в безопасности?</div>
-        <div class="faq-a">Пароли хранятся в виде bcrypt-хешей. Токены — JWT с TTL 24 часа. Данные не передаются третьим лицам.</div>
+        <div class="faq-q">Мои данные в безопасности?</div>
+        <div class="faq-a">Пароли хранятся в виде bcrypt-хешей, никогда не в открытом виде. Данные не продаются и не передаются третьим лицам.</div>
       </div>
     </section>
 
     <footer>
       <span>© 2026 Arkhe</span>
       <div style="display:flex;gap:20px;">
-        <a href="/privacy.html">Политика конфиденциальности</a>
-        <a href="/terms.html">Условия использования</a>
+        <a href="/privacy.html">Конфиденциальность</a>
+        <a href="/terms.html">Условия</a>
       </div>
     </footer>
   </div>
