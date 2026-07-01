@@ -1,55 +1,56 @@
+
 # Arkhe
 
-Геймификационная платформа, которая превращает реальные активности в RPG-прогрессию. Логируй действия, прокачивай статы, держи стрики, разблокируй достижения.
+A gamification platform that turns real-world activities into RPG progression. Log actions, level up stats, maintain streaks, unlock achievements.
 
-## Расшарить друзьям
+## Share with friends
 
-Чтобы дать другу ссылку на локальный сервер:
+To give a friend a link to your local server:
 
 ```bash
-# Установить один раз
+# Install once
 brew install cloudflare/cloudflare/cloudflared
 
-# Поднять сервер (если ещё не запущен)
+# Start the server (if not already running)
 make start
 
-# Создать публичный туннель
+# Create a public tunnel
 cloudflared tunnel --url http://localhost:8080
 ```
 
-В выводе появится ссылка вида `https://xxx-yyy-zzz.trycloudflare.com` — её кидаешь другу. Работает пока терминал открыт.
+The output will contain a link like `https://xxx-yyy-zzz.trycloudflare.com` — share it with your friend. Works as long as the terminal is open.
 
 ---
 
-## Быстрый старт
+## Quick start
 
 ```bash
 git clone https://github.com/Shipovmax/arkhe.git
 cd arkhe
-cp .env.example .env   # заполни переменные
+cp .env.example .env   # fill in the variables
 make dev
 ```
 
-Открой [http://localhost:8080](http://localhost:8080).
+Open [http://localhost:8080](http://localhost:8080).
 
-`make dev` делает всё сам: поднимает Postgres в Docker, применяет миграции, запускает сервер.
+`make dev` does everything for you: starts Postgres in Docker, applies migrations, runs the server.
 
-> **Требования:** Go 1.26+, Docker
+> **Requirements:** Go 1.26+, Docker
 
 ---
 
-## Команды
+## Commands
 
-| Команда | Что делает |
+| Command | What it does |
 |---------|-----------|
-| `make dev` | Postgres в Docker + сервер локально (hot reload) |
-| `make start` | Всё в Docker (prod-режим) |
-| `make build` | Собрать бинарник в `bin/arkhe` |
-| `make docker-down` | Остановить Docker контейнеры |
+| `make dev` | Postgres in Docker + server locally (hot reload) |
+| `make start` | Everything in Docker (prod mode) |
+| `make build` | Build binary to `bin/arkhe` |
+| `make docker-down` | Stop Docker containers |
 
 ---
 
-## Конфигурация `.env`
+## Configuration `.env`
 
 ```env
 DATABASE_URL=postgres://arkhe:secret@localhost:5432/arkhe?sslmode=disable
@@ -58,67 +59,67 @@ JWT_TTL_HOURS=24
 SERVER_PORT=8080
 CORS_ORIGINS=http://localhost:8080
 
-# Email уведомления (опционально, через Resend)
+# Email notifications (optional, via Resend)
 EMAIL_ENABLED=false
 RESEND_API_KEY=
 RESEND_FROM="Arkhe <noreply@arkhe.app>"
 
-# Биллинг (заглушка)
+# Billing (stub)
 BILLING_ENABLED=false
 ```
 
 ---
 
-## Как работает XP
+## How XP works
 
-**Формула XP за активность:**
+**XP formula per activity:**
 ```
 XP = 100 × streak_multiplier × frequency_bonus
 ```
 
-| Стрик | Множитель |
+| Streak | Multiplier |
 |-------|-----------|
-| 0–2 периодов | ×1.0 |
-| 3–6 периодов | ×1.25 |
-| 7–13 периодов | ×1.5 |
-| 14+ периодов | ×2.0 |
+| 0–2 periods | ×1.0 |
+| 3–6 periods | ×1.25 |
+| 7–13 periods | ×1.5 |
+| 14+ periods | ×2.0 |
 
-Бонус ×1.1 если залогировал в первой половине своего периода частоты.
+Bonus ×1.1 if logged in the first half of your frequency period.
 
-**Пороги уровней персонажа** (суммарный XP всех статов):
+**Character level thresholds** (total XP of all stats):
 
-| Уровень | Нужно XP | Активностей на уровень |
+| Level | XP required | Activities per level |
 |---------|----------|------------------------|
 | Lv.2 | 300 XP | ~3 |
 | Lv.3 | 800 XP | ~5 |
-| Lv.4 | 1 600 XP | ~8 |
-| Lv.5 | 2 800 XP | ~12 |
-| Lv.10 | 16 500 XP | ~38 |
+| Lv.4 | 1,600 XP | ~8 |
+| Lv.5 | 2,800 XP | ~12 |
+| Lv.10 | 16,500 XP | ~38 |
 
-Формула: `XP(n) = 100 × (n³ + 11n − 12) / 6`
+Formula: `XP(n) = 100 × (n³ + 11n − 12) / 6`
 
 ---
 
-## Архитектура
+## Architecture
 
 ```
 arkhe/
-├── cmd/server/          # точка входа, DI wiring
-├── cmd/migrate/         # runner миграций
+├── cmd/server/          # entry point, DI wiring
+├── cmd/migrate/         # migration runner
 ├── internal/
-│   ├── domain/          # бизнес-сущности, формулы XP
-│   ├── port/            # интерфейсы репозиториев
-│   ├── usecase/         # бизнес-логика
+│   ├── domain/          # business entities, XP formulas
+│   ├── port/            # repository interfaces
+│   ├── usecase/         # business logic
 │   ├── adapter/
-│   │   ├── postgres/    # реализация репозиториев (pgx/v5)
+│   │   ├── postgres/    # repository implementations (pgx/v5)
 │   │   └── http/        # handlers, middleware, router
 │   ├── email/           # Resend email sender
-│   └── infrastructure/  # конфиг, пул подключений, миграции
-├── migrations/          # SQL миграции
-└── web/                 # статика (HTML + CSS + JS SPA)
+│   └── infrastructure/  # config, connection pool, migrations
+├── migrations/          # SQL migrations
+└── web/                 # static files (HTML + CSS + JS SPA)
 ```
 
-**Стек:** Go 1.26 · PostgreSQL 16 · pgx/v5 · JWT HS256 · Vanilla JS · Docker Compose
+**Stack:** Go 1.26 · PostgreSQL 16 · pgx/v5 · JWT HS256 · Vanilla JS · Docker Compose
 
 ---
 
@@ -143,66 +144,66 @@ GET /api/v1/analytics/summary
 GET /healthz
 ```
 
-Все защищённые роуты требуют `Authorization: Bearer <token>`.
+All protected routes require `Authorization: Bearer <token>`.
 
 ---
 
-## Ручное тестирование
+## Manual testing
 
-### Лендинг (`/`)
-- [ ] Страница загружается, видна Hero-секция
-- [ ] Кнопка «Начать» → переход на `/app.html`
-- [ ] FAQ раскрывается, блок pricing отображается
+### Landing page (`/`)
+- [ ] Page loads, Hero section is visible
+- [ ] "Start" button → navigates to `/app.html`
+- [ ] FAQ expands, pricing block is displayed
 
-### Регистрация
-- [ ] Форма регистрации: email + пароль + имя + класс + статы
-- [ ] Email без `@` — показывает ошибку валидации
-- [ ] Слабый пароль (<6 символов) — показывает ошибку
-- [ ] Кнопка показа/скрытия пароля работает
-- [ ] Успешная регистрация → онбординг или дашборд
-- [ ] Повторная регистрация с тем же email → ошибка «уже занят»
+### Registration
+- [ ] Registration form: email + password + name + class + stats
+- [ ] Email without `@` — shows validation error
+- [ ] Weak password (<6 chars) — shows error
+- [ ] Show/hide password button works
+- [ ] Successful registration → onboarding or dashboard
+- [ ] Duplicate registration with same email → error "already taken"
 
-### Вход
-- [ ] Правильный email + пароль → дашборд
-- [ ] Неверный пароль → сообщение об ошибке
-- [ ] Ссылка «Нет аккаунта?» переключает на форму регистрации
+### Login
+- [ ] Correct email + password → dashboard
+- [ ] Wrong password → error message
+- [ ] "No account?" link switches to registration form
 
-### Онбординг (новый пользователь)
-- [ ] Можно ввести display name и выбрать класс
-- [ ] Добавить стат (имя, иконка, частота)
-- [ ] Удалить стат из списка
-- [ ] Сохранить персонажа → переход на дашборд
+### Onboarding (new user)
+- [ ] Can enter display name and choose class
+- [ ] Add stat (name, icon, frequency)
+- [ ] Delete stat from the list
+- [ ] Save character → redirect to dashboard
 
-### Дашборд
-- [ ] Дуга XP анимируется при загрузке
-- [ ] Отображается уровень, класс, имя, стрик, XP
-- [ ] Клик на имя → открывается дропдаун-меню
-- [ ] Дропдаун: «Выйти» → разлогинивает и возвращает на стартовый экран
-- [ ] Карточки статов показывают уровень, стрик, XP-бар, кнопку «+ Записать»
+### Dashboard
+- [ ] XP arc animates on load
+- [ ] Shows level, class, name, streak, XP
+- [ ] Click on name → dropdown menu opens
+- [ ] Dropdown: "Log out" → logs out and returns to start screen
+- [ ] Stat cards show level, streak, XP bar, "+ Log" button
 
-### Логирование активности
-- [ ] Клик «+ Записать» → модал с описанием
-- [ ] Пустое описание → кнопка заблокирована / ошибка
-- [ ] Успешная запись → частицы летят к дуге, XP обновляется
-- [ ] Дуга анимируется до нового значения
-- [ ] При level up → сбрасывается в 0 и заполняется заново
-- [ ] Карточка стата пульсирует (xp-pulse)
-- [ ] При повышении уровня → всплывает level-up оверлей
-- [ ] При повышении уровня стата → toast-уведомление
-- [ ] Новая активность появляется в «Последних активностях»
+### Activity logging
+- [ ] Click "+ Log" → modal with description
+- [ ] Empty description → button disabled / error
+- [ ] Successful log → particles fly to the arc, XP updates
+- [ ] Arc animates to new value
+- [ ] On level up → resets to 0 and fills again
+- [ ] Stat card pulses (xp-pulse)
+- [ ] On level up → level-up overlay appears
+- [ ] On stat level up → toast notification
+- [ ] New activity appears in "Recent activities"
 
-### Достижения
-- [ ] После логирования появляется toast если разблокировано достижение
+### Achievements
+- [ ] After logging, a toast appears if an achievement is unlocked
 
 ---
 
-## Фичи
+## Features
 
-- **Per-stat прогрессия** — каждый стат качается отдельно со своим уровнем и XP
-- **Streak per stat** — своя частота для каждого навыка
-- **Кубическая прогрессия** — каждый уровень требует всё больше усилий
-- **XP анимации** — частицы летят к XP-кольцу, level up оверлей
-- **Achievements** — проверяются асинхронно после каждой активности
-- **Rate limiting** — per-IP (5 req/min на auth, 60 req/min на API)
-- **Graceful shutdown** — SIGINT/SIGTERM, 10 сек на завершение
-- **Миграции** — встроенный runner, без внешних инструментов
+- **Per-stat progression** — each stat levels up independently with its own level and XP
+- **Streak per stat** — individual frequency for each skill
+- **Cubic progression** — each level requires more effort
+- **XP animations** — particles fly to the XP ring, level-up overlay
+- **Achievements** — checked asynchronously after each activity
+- **Rate limiting** — per-IP (5 req/min on auth, 60 req/min on API)
+- **Graceful shutdown** — SIGINT/SIGTERM, 10 sec to finish
+- **Migrations** — embedded runner, no external tools
